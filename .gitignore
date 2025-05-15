@@ -1,0 +1,21 @@
+# 编译输出
+/target/
+/bin/
+/out/
+*.class
+
+# 日志文件
+*.log
+logs/
+
+# IDE相关文件和目录
+.idea/
+*.iml
+*.iws
+*.ipr
+.settings/
+.classpath
+.project
+.vscode/
+.metadata/
+.DS_Store
