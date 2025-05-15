@@ -1,13 +1,15 @@
 package io.njdldkl.frame;
 
+import io.njdldkl.WindowManager;
 import io.njdldkl.component.RoundedButton;
-import io.njdldkl.dialog.EasterEggDialog;
-import io.njdldkl.dialog.HelpDialog;
+import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.util.ComponentUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.util.Arrays;
 
+@Slf4j
 public class MenuFrame extends BaseFrame {
 
     private JPanel contentPane;
@@ -22,8 +24,6 @@ public class MenuFrame extends BaseFrame {
     private RoundedButton singlePlayButton;
     private RoundedButton multiPlayButton;
 
-    private static final int BUTTON_RADIUS = 20;
-
     private final boolean[] titleButtonsPressed = new boolean[6];
 
     public MenuFrame() {
@@ -32,7 +32,7 @@ public class MenuFrame extends BaseFrame {
         ComponentUtils.setCenterWindowOnScreen(this);
 
         // 帮助按钮
-        helpButton.addActionListener(e -> new HelpDialog(this).setVisible(true));
+        helpButton.addActionListener(e -> WindowManager.getInstance().showHelpDialog());
 
         // 标题按钮
         title1Button.addActionListener(e -> handleTitleButtonPress(0));
@@ -43,9 +43,7 @@ public class MenuFrame extends BaseFrame {
         title6Button.addActionListener(e -> handleTitleButtonPress(5));
 
         // 单人游戏按钮
-        singlePlayButton.addActionListener(e -> {
-            // TODO
-        });
+        singlePlayButton.addActionListener(e -> WindowManager.getInstance().showSinglePlayFrame());
 
         // 多人对战按钮
         multiPlayButton.addActionListener(e -> {
@@ -79,20 +77,21 @@ public class MenuFrame extends BaseFrame {
             }
         }
         if (allPressed) {
-            new EasterEggDialog(this).setVisible(true);
+            log.debug("触发彩蛋");
+            WindowManager.getInstance().showEasterEggDialog();
             Arrays.fill(titleButtonsPressed, false);
         }
     }
 
     private void createUIComponents() {
-        helpButton = new RoundedButton(BUTTON_RADIUS);
-        title1Button = new RoundedButton(BUTTON_RADIUS);
-        title2Button = new RoundedButton(BUTTON_RADIUS);
-        title3Button = new RoundedButton(BUTTON_RADIUS);
-        title4Button = new RoundedButton(BUTTON_RADIUS);
-        title5Button = new RoundedButton(BUTTON_RADIUS);
-        title6Button = new RoundedButton(BUTTON_RADIUS);
-        singlePlayButton = new RoundedButton(BUTTON_RADIUS);
-        multiPlayButton = new RoundedButton(BUTTON_RADIUS);
+        helpButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        title1Button = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        title2Button = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        title3Button = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        title4Button = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        title5Button = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        title6Button = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        singlePlayButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        multiPlayButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
     }
 }
