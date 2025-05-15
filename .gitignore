@@ -7,6 +7,7 @@
 # 日志文件
 *.log
 logs/
+log/
 
 # IDE相关文件和目录
 .idea/

@@ -10,7 +10,6 @@ public class ComponentUtils {
      */
     public static void setCenterWindowOnScreen(Component component) {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        System.out.println("Screen Size: " + screenSize);
         Dimension windowSize = component.getSize();
         int x = (screenSize.width - windowSize.width) / 2;
         int y = (screenSize.height - windowSize.height) / 2;

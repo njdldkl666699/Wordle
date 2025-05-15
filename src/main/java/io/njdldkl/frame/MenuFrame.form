@@ -130,7 +130,7 @@
           <enabled value="true"/>
           <focusCycleRoot value="false"/>
           <focusPainted value="false"/>
-          <font name="Consolas" size="48"/>
+          <font name="Arial" size="36"/>
           <foreground color="-1"/>
           <horizontalTextPosition value="11"/>
           <rolloverEnabled value="true"/>
@@ -151,7 +151,7 @@
           <borderPainted value="false"/>
           <contentAreaFilled value="false"/>
           <focusPainted value="false"/>
-          <font name="Consolas" size="48"/>
+          <font name="Arial" size="36"/>
           <foreground color="-1"/>
           <rolloverEnabled value="true"/>
           <text value="O"/>
@@ -170,7 +170,7 @@
           <borderPainted value="false"/>
           <contentAreaFilled value="false"/>
           <focusPainted value="false"/>
-          <font name="Consolas" size="48"/>
+          <font name="Arial" size="36"/>
           <foreground color="-1"/>
           <rolloverEnabled value="true"/>
           <text value="R"/>
@@ -189,7 +189,7 @@
           <borderPainted value="false"/>
           <contentAreaFilled value="false"/>
           <focusPainted value="false"/>
-          <font name="Consolas" size="48"/>
+          <font name="Arial" size="36"/>
           <foreground color="-1"/>
           <opaque value="false"/>
           <rolloverEnabled value="true"/>
@@ -209,7 +209,7 @@
           <borderPainted value="false"/>
           <contentAreaFilled value="false"/>
           <focusPainted value="false"/>
-          <font name="Consolas" size="48"/>
+          <font name="Arial" size="36"/>
           <foreground color="-1"/>
           <opaque value="false"/>
           <rolloverEnabled value="true"/>
@@ -229,7 +229,7 @@
           <borderPainted value="false"/>
           <contentAreaFilled value="false"/>
           <focusPainted value="false"/>
-          <font name="Consolas" size="48"/>
+          <font name="Arial" size="36"/>
           <foreground color="-1"/>
           <opaque value="false"/>
           <text value="E"/>
