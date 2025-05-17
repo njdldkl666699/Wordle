@@ -1,9 +1,9 @@
 package io.njdldkl;
 
-import io.njdldkl.dialog.EasterEggDialog;
-import io.njdldkl.dialog.HelpDialog;
-import io.njdldkl.frame.MenuFrame;
-import io.njdldkl.frame.SinglePlayFrame;
+import io.njdldkl.view.dialog.EasterEggDialog;
+import io.njdldkl.view.dialog.HelpDialog;
+import io.njdldkl.view.frame.MenuFrame;
+import io.njdldkl.view.frame.SinglePlayFrame;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,7 +24,7 @@ public class WindowManager {
 
     public static WindowManager getInstance() {
         if (instance == null) {
-            log.debug("创建窗口管理器实例");
+            log.info("创建窗口管理器实例");
             instance = new WindowManager();
         }
         return instance;
@@ -32,7 +32,7 @@ public class WindowManager {
 
     public void showMenuFrame() {
         if (menuFrame == null) {
-            log.debug("创建主菜单窗口");
+            log.info("创建主菜单窗口");
             menuFrame = new MenuFrame();
         }
         if (singlePlayFrame != null) {
@@ -43,7 +43,7 @@ public class WindowManager {
 
     public void showSinglePlayFrame() {
         if (singlePlayFrame == null) {
-            log.debug("创建单人游戏窗口");
+            log.info("创建单人游戏窗口");
             singlePlayFrame = new SinglePlayFrame();
         }
         menuFrame.setVisible(false);
@@ -52,7 +52,7 @@ public class WindowManager {
 
     public void showEasterEggDialog() {
         if (easterEggDialog == null) {
-            log.debug("创建彩蛋对话框");
+            log.info("创建彩蛋对话框");
             easterEggDialog = new EasterEggDialog(menuFrame);
         }
         easterEggDialog.setVisible(true);
@@ -60,7 +60,7 @@ public class WindowManager {
 
     public void showHelpDialog() {
         if (helpDialog == null) {
-            log.debug("创建帮助对话框");
+            log.info("创建帮助对话框");
             helpDialog = new HelpDialog(menuFrame);
         }
         helpDialog.setVisible(true);

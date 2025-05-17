@@ -1,6 +1,6 @@
-package io.njdldkl.dialog;
+package io.njdldkl.view.dialog;
 
-import io.njdldkl.component.RoundedLetterPanel;
+import io.njdldkl.view.component.RoundedLetterPanel;
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.DimensionConstant;
 import io.njdldkl.constant.IntegerConstant;
@@ -77,7 +77,7 @@ public class HelpDialog extends JDialog {
         mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         // 添加示例单词"TABLE"
-        JPanel tablePanel = createWordPanel(new char[]{'T', 'A', 'B', 'L', 'E'},
+        JPanel tablePanel = createWordPanel(new String[]{"T", "A", "B", "L", "E"},
                 new Color[]{ColorConstant.GRAY, ColorConstant.YELLOW, ColorConstant.GRAY, ColorConstant.YELLOW, ColorConstant.GREEN});
         mainPanel.add(tablePanel);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 20)));
@@ -93,7 +93,7 @@ public class HelpDialog extends JDialog {
         mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         // 添加示例单词"FLASH"
-        JPanel flashPanel = createWordPanel(new char[]{'F', 'L', 'A', 'S', 'H'},
+        JPanel flashPanel = createWordPanel(new String[]{"F", "L", "A", "S", "H"},
                 new Color[]{ColorConstant.GREEN, ColorConstant.GREEN, ColorConstant.GREEN, ColorConstant.GRAY, ColorConstant.GRAY});
         mainPanel.add(flashPanel);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -104,7 +104,7 @@ public class HelpDialog extends JDialog {
         mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         // 添加示例单词"FLAME"
-        JPanel flamePanel = createWordPanel(new char[]{'F', 'L', 'A', 'M', 'E'},
+        JPanel flamePanel = createWordPanel(new String[]{"F", "L", "A", "M", "E"},
                 new Color[]{ColorConstant.GREEN, ColorConstant.GREEN, ColorConstant.GREEN, ColorConstant.GREEN, ColorConstant.GREEN});
         mainPanel.add(flamePanel);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -157,7 +157,7 @@ public class HelpDialog extends JDialog {
     /**
      * 创建单词面板，显示一个单词的字母和颜色
      */
-    private JPanel createWordPanel(char[] letters, Color[] colors) {
+    private JPanel createWordPanel(String[] letters, Color[] colors) {
         JPanel panel = new JPanel();
         panel.setBackground(ColorConstant.BLANK);
         panel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -172,10 +172,10 @@ public class HelpDialog extends JDialog {
     /**
      * 创建字母框
      */
-    private JPanel createLetterBox(char letter, Color bgColor) {
+    private JPanel createLetterBox(String letter, Color bgColor) {
         // 使用RoundedLetterPanel
-        return new RoundedLetterPanel(letter, new Dimension(50, 50),
-                bgColor, IntegerConstant.SHARP_RADIUS, LETTER_FONT);
+        return new RoundedLetterPanel(DimensionConstant.LETTER_PANEL, letter,
+                LETTER_FONT, bgColor, IntegerConstant.SHARP_RADIUS);
     }
 
     /**
@@ -191,8 +191,8 @@ public class HelpDialog extends JDialog {
         // 灰色字母解释
         JPanel greyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         greyPanel.setBackground(panel.getBackground());
-        greyPanel.add(createLetterBox('T', ColorConstant.GRAY));
-        greyPanel.add(createLetterBox('B', ColorConstant.GRAY));
+        greyPanel.add(createLetterBox("T", ColorConstant.GRAY));
+        greyPanel.add(createLetterBox("B", ColorConstant.GRAY));
         JLabel jLabel1 = new JLabel(" 不在目标单词中。");
         jLabel1.setFont(CONTENT_FONT);
         greyPanel.add(jLabel1);
@@ -201,8 +201,8 @@ public class HelpDialog extends JDialog {
         // 黄色字母解释
         JPanel yellowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         yellowPanel.setBackground(panel.getBackground());
-        yellowPanel.add(createLetterBox('A', ColorConstant.YELLOW));
-        yellowPanel.add(createLetterBox('L', ColorConstant.YELLOW));
+        yellowPanel.add(createLetterBox("A", ColorConstant.YELLOW));
+        yellowPanel.add(createLetterBox("L", ColorConstant.YELLOW));
         JLabel jLabel2 = new JLabel(" 在单词中但位置错误。");
         jLabel2.setFont(CONTENT_FONT);
         yellowPanel.add(jLabel2);
@@ -211,7 +211,7 @@ public class HelpDialog extends JDialog {
         // 绿色字母解释
         JPanel greenPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         greenPanel.setBackground(panel.getBackground());
-        greenPanel.add(createLetterBox('E', ColorConstant.GREEN));
+        greenPanel.add(createLetterBox("E", ColorConstant.GREEN));
         JLabel jLabel3 = new JLabel(" 在单词中且位置正确。");
         jLabel3.setFont(CONTENT_FONT);
         greenPanel.add(jLabel3);

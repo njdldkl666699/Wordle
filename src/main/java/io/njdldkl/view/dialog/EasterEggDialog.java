@@ -1,4 +1,4 @@
-package io.njdldkl.dialog;
+package io.njdldkl.view.dialog;
 
 import javax.swing.*;
 

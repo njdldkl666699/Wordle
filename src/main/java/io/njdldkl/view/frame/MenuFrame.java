@@ -1,7 +1,7 @@
-package io.njdldkl.frame;
+package io.njdldkl.view.frame;
 
 import io.njdldkl.WindowManager;
-import io.njdldkl.component.RoundedButton;
+import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.util.ComponentUtils;
 import lombok.extern.slf4j.Slf4j;

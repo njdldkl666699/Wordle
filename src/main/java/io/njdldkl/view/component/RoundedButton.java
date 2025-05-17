@@ -1,4 +1,4 @@
-package io.njdldkl.component;
+package io.njdldkl.view.component;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,7 +6,8 @@ import java.awt.geom.RoundRectangle2D;
 
 public class RoundedButton extends JButton {
 
-    private int cornerRadius; // 圆角半径
+    // 圆角半径
+    private int cornerRadius;
 
     public RoundedButton(int radius) {
         super();
@@ -25,7 +26,7 @@ public class RoundedButton extends JButton {
         if (getModel().isPressed()) {
             g2.setColor(getBackground().darker()); // 按下时颜色变深
         } else if (getModel().isRollover()) {
-            g2.setColor(getBackground().brighter()); // 悬停时颜色变亮
+            g2.setColor(getBackground().darker()); // 悬停时颜色变亮
         } else {
             g2.setColor(getBackground());
         }
@@ -39,6 +40,9 @@ public class RoundedButton extends JButton {
 
     @Override
     protected void paintBorder(Graphics g) {
+        if(!isBorderPainted()){
+            return;
+        }
         // 可选：绘制自定义边框（如需要）
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

@@ -1,4 +1,4 @@
-import io.njdldkl.component.RoundedLetterPanel;
+import io.njdldkl.view.component.RoundedLetterPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,8 +13,8 @@ public class LetterPanelTest {
         frame.setLayout(null);
 
         // 创建 LetterPanel 实例
-        RoundedLetterPanel roundedLetterPanel = new RoundedLetterPanel('A',new Dimension(50,50),Color.GREEN,20, new Font("Arial", Font.BOLD, 20));
-        RoundedLetterPanel blankRoundedLetterPanel = new RoundedLetterPanel(new Dimension(50,50),Color.GREEN,20,Color.RED,2);
+        RoundedLetterPanel roundedLetterPanel = new RoundedLetterPanel(new Dimension(50, 50), "A", new Font("Arial", Font.BOLD, 20), Color.GREEN, 20);
+        RoundedLetterPanel blankRoundedLetterPanel = new RoundedLetterPanel(new Dimension(50, 50), new Font("Arial", Font.BOLD, 20), Color.GREEN, 20, Color.RED, 2);
         roundedLetterPanel.setBounds(50, 50, 300, 200); // 设置位置和大小
         blankRoundedLetterPanel.setBounds(400, 300, 300, 200); // 设置位置和大小
 

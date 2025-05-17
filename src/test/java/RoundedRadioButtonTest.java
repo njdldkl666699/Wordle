@@ -1,4 +1,4 @@
-import io.njdldkl.component.RoundedRadioButton;
+import io.njdldkl.view.component.RoundedRadioButton;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="io.njdldkl.frame.MenuFrame">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="io.njdldkl.view.frame.MenuFrame">
   <grid id="27dc6" binding="contentPane" layout-manager="GridLayoutManager" row-count="10" column-count="11" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
@@ -50,7 +50,7 @@
           </grid>
         </constraints>
       </hspacer>
-      <component id="b8f46" class="io.njdldkl.component.RoundedButton" binding="helpButton" custom-create="true">
+      <component id="b8f46" class="io.njdldkl.view.component.RoundedButton" binding="helpButton" custom-create="true">
         <constraints>
           <grid row="1" column="9" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="48" height="48"/>
@@ -112,7 +112,7 @@
           </grid>
         </constraints>
       </vspacer>
-      <component id="ab5eb" class="io.njdldkl.component.RoundedButton" binding="title1Button" custom-create="true">
+      <component id="ab5eb" class="io.njdldkl.view.component.RoundedButton" binding="title1Button" custom-create="true">
         <constraints>
           <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="48" height="48"/>
@@ -137,7 +137,7 @@
           <text value="W"/>
         </properties>
       </component>
-      <component id="ff38b" class="io.njdldkl.component.RoundedButton" binding="title2Button" custom-create="true">
+      <component id="ff38b" class="io.njdldkl.view.component.RoundedButton" binding="title2Button" custom-create="true">
         <constraints>
           <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="48" height="48"/>
@@ -157,7 +157,7 @@
           <text value="O"/>
         </properties>
       </component>
-      <component id="86d0c" class="io.njdldkl.component.RoundedButton" binding="title3Button" custom-create="true">
+      <component id="86d0c" class="io.njdldkl.view.component.RoundedButton" binding="title3Button" custom-create="true">
         <constraints>
           <grid row="3" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="48" height="48"/>
@@ -176,7 +176,7 @@
           <text value="R"/>
         </properties>
       </component>
-      <component id="2e62d" class="io.njdldkl.component.RoundedButton" binding="title4Button" custom-create="true">
+      <component id="2e62d" class="io.njdldkl.view.component.RoundedButton" binding="title4Button" custom-create="true">
         <constraints>
           <grid row="3" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="48" height="48"/>
@@ -196,7 +196,7 @@
           <text value="D"/>
         </properties>
       </component>
-      <component id="2c719" class="io.njdldkl.component.RoundedButton" binding="title5Button" custom-create="true">
+      <component id="2c719" class="io.njdldkl.view.component.RoundedButton" binding="title5Button" custom-create="true">
         <constraints>
           <grid row="3" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="48" height="48"/>
@@ -216,7 +216,7 @@
           <text value="L"/>
         </properties>
       </component>
-      <component id="f8881" class="io.njdldkl.component.RoundedButton" binding="title6Button" custom-create="true">
+      <component id="f8881" class="io.njdldkl.view.component.RoundedButton" binding="title6Button" custom-create="true">
         <constraints>
           <grid row="3" column="7" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="48" height="48"/>
@@ -271,7 +271,7 @@
           </grid>
         </constraints>
       </vspacer>
-      <component id="a4b73" class="io.njdldkl.component.RoundedButton" binding="singlePlayButton" custom-create="true">
+      <component id="a4b73" class="io.njdldkl.view.component.RoundedButton" binding="singlePlayButton" custom-create="true">
         <constraints>
           <grid row="5" column="3" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="-1" height="48"/>
@@ -281,7 +281,7 @@
         </constraints>
         <properties>
           <background color="-1"/>
-          <borderPainted value="false"/>
+          <borderPainted value="true"/>
           <contentAreaFilled value="false"/>
           <focusPainted value="false"/>
           <font name="SimHei" size="48"/>
@@ -292,7 +292,7 @@
           <text value="单人游戏"/>
         </properties>
       </component>
-      <component id="b3a1" class="io.njdldkl.component.RoundedButton" binding="multiPlayButton" custom-create="true">
+      <component id="b3a1" class="io.njdldkl.view.component.RoundedButton" binding="multiPlayButton" custom-create="true">
         <constraints>
           <grid row="7" column="3" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="-1" height="48"/>
@@ -302,7 +302,7 @@
         </constraints>
         <properties>
           <background color="-1"/>
-          <borderPainted value="false"/>
+          <borderPainted value="true"/>
           <contentAreaFilled value="false"/>
           <focusPainted value="false"/>
           <font name="SimHei" size="48"/>

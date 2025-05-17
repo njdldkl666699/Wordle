@@ -1,4 +1,4 @@
-package io.njdldkl.component;
+package io.njdldkl.view.component;
 
 import javax.swing.*;
 import java.awt.*;

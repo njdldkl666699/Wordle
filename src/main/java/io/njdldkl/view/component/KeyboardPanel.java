@@ -1,7 +1,8 @@
-package io.njdldkl.component;
+package io.njdldkl.view.component;
 
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.IntegerConstant;
+import io.njdldkl.enumerable.WordStatus;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +19,8 @@ public class KeyboardPanel extends JPanel {
 
     // 按键映射
     private final Map<String, RoundedButton> keyButtons = new HashMap<>();
+    // 按键状态映射
+    private final Map<String, WordStatus> keyStatusMap = new HashMap<>();
 
     // 按键样式常量
     private static final int BUTTON_HEIGHT = 50;
@@ -44,7 +47,7 @@ public class KeyboardPanel extends JPanel {
         add(row3Panel);
     }
 
-    private JPanel createRowPanel(String[] keys,int buttonWidth) {
+    private JPanel createRowPanel(String[] keys, int buttonWidth) {
         JPanel rowPanel = new JPanel();
         rowPanel.setLayout(new FlowLayout(FlowLayout.CENTER, BUTTON_GAP, 0));
         rowPanel.setBackground(Color.WHITE);
@@ -110,6 +113,9 @@ public class KeyboardPanel extends JPanel {
             button.setBackground(ColorConstant.GREEN);
             button.setForeground(Color.WHITE);
         }
+
+        // 更新按键状态
+        keyStatusMap.put(key, WordStatus.CORRECT);
     }
 
     /**
@@ -120,6 +126,12 @@ public class KeyboardPanel extends JPanel {
         if (button != null) {
             button.setBackground(ColorConstant.YELLOW);
             button.setForeground(Color.WHITE);
+        }
+
+        // 更新按键状态
+        WordStatus wordStatus = keyStatusMap.get(key);
+        if (wordStatus != WordStatus.CORRECT) {
+            keyStatusMap.put(key, WordStatus.WRONG_POSITION);
         }
     }
 
@@ -132,6 +144,12 @@ public class KeyboardPanel extends JPanel {
             button.setBackground(ColorConstant.GRAY);
             button.setForeground(Color.WHITE);
         }
+
+        // 更新按键状态
+        WordStatus wordStatus = keyStatusMap.get(key);
+        if (wordStatus != WordStatus.CORRECT && wordStatus != WordStatus.WRONG_POSITION) {
+            keyStatusMap.put(key, WordStatus.ABSENT);
+        }
     }
 
     /**
@@ -142,5 +160,6 @@ public class KeyboardPanel extends JPanel {
             button.setBackground(ColorConstant.LIGHT_GRAY);
             button.setForeground(Color.BLACK);
         }
+        keyStatusMap.clear();
     }
 }

@@ -1,5 +1,4 @@
-import io.njdldkl.component.RoundedButton;
-import org.junit.jupiter.api.Test;
+import io.njdldkl.view.component.RoundedButton;
 
 import javax.swing.*;
 import java.awt.*;

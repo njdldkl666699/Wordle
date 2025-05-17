@@ -1,4 +1,4 @@
-import io.njdldkl.dialog.HelpDialog;
+import io.njdldkl.view.dialog.HelpDialog;
 
 public class HelpDialogTest {
 
