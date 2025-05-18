@@ -2,9 +2,9 @@ package io.njdldkl.view.frame;
 
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.IntegerConstant;
+import io.njdldkl.pojo.User;
 import io.njdldkl.service.impl.SinglePlayService;
 import io.njdldkl.util.ComponentUtils;
-import io.njdldkl.util.PlayFrameUtil;
 import io.njdldkl.view.component.KeyboardPanel;
 import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.component.RoundedRadioButton;
@@ -18,7 +18,7 @@ import java.util.Enumeration;
 public class SinglePlayFrame extends BaseFrame {
 
     private JPanel contentPane;
-    private final PlayFrameUtil playFrameUtil;
+    private final PlayFrameHelper playFrameHelper;
 
     private RoundedButton homeButton;
 
@@ -42,31 +42,41 @@ public class SinglePlayFrame extends BaseFrame {
     // 字母数量
     protected int letterCount;
 
-    public SinglePlayFrame() {
+    public SinglePlayFrame(User user) {
         setContentPane(contentPane);
 
-        playFrameUtil = PlayFrameUtil.builder()
+        playFrameHelper = PlayFrameHelper.builder()
                 .frame(this)
                 .playService(new SinglePlayService())
                 .homeButton(homeButton)
                 .guessScrollPane(guessScrollPane)
                 .guessPane(guessPane)
                 .keyboardPane(keyboardPane)
+                .user(user)
                 .build();
-        playFrameUtil.initUI();
+        playFrameHelper.initUI();
 
         // 默认字母数量为5
         letterCount = 5;
         letterButtonGroup.setSelected(letter5RadioButton.getModel(), true);
-        playFrameUtil.updateGuessPane(letterCount);
+        playFrameHelper.updateGuessPane(letterCount);
 
         pack();
         ComponentUtils.setCenterWindowOnScreen(this);
 
-        playFrameUtil.setListeners();
+        playFrameHelper.setListeners();
         // 设置面板
         setupLetterButtonGroupListener();
         settingsButton.addActionListener(e -> settingsPane.setVisible(!settingsPane.isVisible()));
+    }
+
+    /**
+     * 重置游戏
+     */
+    public void reset(){
+        letterCount = 5;
+        letterButtonGroup.setSelected(letter5RadioButton.getModel(), true);
+        playFrameHelper.updateGuessPane(letterCount);
     }
 
     /**
@@ -85,7 +95,7 @@ public class SinglePlayFrame extends BaseFrame {
 
                     // 立即更新字母数量，并更新面板
                     letterCount = newLetterCount;
-                    playFrameUtil.updateGuessPane(newLetterCount);
+                    playFrameHelper.updateGuessPane(newLetterCount);
                     keyboardPane.resetKeyboard();
 
                     // 关闭设置面板

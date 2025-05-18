@@ -1,6 +1,7 @@
-package io.njdldkl.util;
+package io.njdldkl.view.frame;
 
-import io.njdldkl.WindowManager;
+import io.njdldkl.pojo.User;
+import io.njdldkl.view.WindowManager;
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.DimensionConstant;
 import io.njdldkl.constant.IntegerConstant;
@@ -10,6 +11,7 @@ import io.njdldkl.service.PlayService;
 import io.njdldkl.view.component.KeyboardPanel;
 import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.component.RoundedLetterPanel;
+import io.njdldkl.view.dialog.AutoCloseDialog;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,16 +20,14 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 游戏窗口工具类，存放单人游戏和多人对战的公共UI逻辑
  */
 @Slf4j
 @Builder
-public class PlayFrameUtil {
+public class PlayFrameHelper {
 
     private static final Font LETTER_FONT = new Font("Arial", Font.BOLD, 36);
 
@@ -40,6 +40,8 @@ public class PlayFrameUtil {
     private final KeyboardPanel keyboardPane;
 
     private PlayService playService;
+
+    private User user;
 
     // 总行数
     private int totalRow;
@@ -114,7 +116,7 @@ public class PlayFrameUtil {
     public void updateGuessPane(int letterCount) {
         // 重置游戏状态
         resetFields(letterCount);
-        playService.startGame(letterCount);
+        playService.startGame(letterCount, user);
 
         // 清空面板
         guessPane.removeAll();
@@ -165,7 +167,9 @@ public class PlayFrameUtil {
         // 检查当前列索引是否到达总列数
         if (currentCol < totalCol) {
             log.info("单词未猜测完整，无法提交");
-            // 也可以给用户提示
+            // 弹出提示框，提示用户单词未猜测完整
+            AutoCloseDialog dialog = new AutoCloseDialog(frame);
+            dialog.setTitle("单词太短");
             return;
         }
 
@@ -174,13 +178,16 @@ public class PlayFrameUtil {
         // 提交猜测并检验是否合法
         boolean valid = playService.isValidWord(guessWord);
         if (!valid) {
-            // TODO 提示用户单词不合法，弹出一个对话框
             log.info("单词不合法");
+            AutoCloseDialog dialog = new AutoCloseDialog(frame);
+            dialog.setTitle("单词未找到");
             return;
         }
 
         // 检查是否猜测正确
-        List<WordStatus> wordStatusList = playService.checkWord(guessWord);
+        Pair<Boolean, List<WordStatus>> pairResult = playService.checkWord(guessWord);
+        boolean correct = pairResult.getFirst();
+        List<WordStatus> wordStatusList = pairResult.getSecond();
 
         // 构造字母和状态的列表
         List<Pair<String, WordStatus>> pairList = new ArrayList<>();
@@ -205,18 +212,26 @@ public class PlayFrameUtil {
         keyboardPane.revalidate();
         keyboardPane.repaint();
 
-        // 更新当前行列索引
-        currentRow++;
-        currentCol = 0;
-
         // 如果全部正确，弹出对话框
-        boolean correct = wordStatusList.stream()
-                .allMatch(wordStatus -> wordStatus == WordStatus.CORRECT);
         if (correct) {
             log.info("猜测正确，游戏胜利");
             // TODO 提示用户胜利，弹出一个对话框，显示单词和释义
+
             return;
         }
+
+        // 更新当前行列索引
+        currentRow++;
+        if (playService.isFailed()) {
+            // 判断是否失败
+            // 单人模式下，失败条件为猜测次数超过最大次数，正常情况下不起作用
+            // 多人模式下，最先猜测正确的玩家获胜，其余玩家失败
+            log.info("游戏失败，正确单词为: {}", playService.getAnswer().getWord());
+            // TODO 提示用户游戏结束，弹出一个对话框，显示单词和释义
+
+            return;
+        }
+        currentCol = 0;
     }
 
     /**
@@ -297,7 +312,7 @@ public class PlayFrameUtil {
      * 添加字母到当前猜测
      */
     private void addCharToCurrentGuess(String key) {
-        log.info("添加字母: {}", key);
+        log.debug("添加字母: {}", key);
 
         // 1. 检查当前行列是否已满
         if (currentRow >= totalRow || currentCol >= totalCol) {

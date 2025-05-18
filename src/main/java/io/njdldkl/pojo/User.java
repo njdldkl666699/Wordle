@@ -3,10 +3,12 @@ package io.njdldkl.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import javax.swing.*;
+
 @Data
 @AllArgsConstructor
-public class Pair<F,S>{
+public class User {
 
-    F first;
-    S second;
+    private String name;
+    private ImageIcon avatar;
 }

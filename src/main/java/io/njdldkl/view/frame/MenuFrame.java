@@ -1,12 +1,14 @@
 package io.njdldkl.view.frame;
 
-import io.njdldkl.WindowManager;
-import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.constant.IntegerConstant;
+import io.njdldkl.pojo.User;
 import io.njdldkl.util.ComponentUtils;
+import io.njdldkl.view.WindowManager;
+import io.njdldkl.view.component.RoundedButton;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Arrays;
 
 @Slf4j
@@ -23,6 +25,9 @@ public class MenuFrame extends BaseFrame {
     private RoundedButton title6Button;
     private RoundedButton singlePlayButton;
     private RoundedButton multiPlayButton;
+    private JPanel titlePanel;
+    private RoundedButton avatarButton;
+    private JPanel usernamePanel;
 
     private final boolean[] titleButtonsPressed = new boolean[6];
 
@@ -30,6 +35,9 @@ public class MenuFrame extends BaseFrame {
         setContentPane(contentPane);
         pack();
         ComponentUtils.setCenterWindowOnScreen(this);
+
+        // 头像按钮
+        avatarButton.addActionListener(e -> handleAvatarButtonPress());
 
         // 帮助按钮
         helpButton.addActionListener(e -> WindowManager.getInstance().showHelpDialog());
@@ -49,6 +57,12 @@ public class MenuFrame extends BaseFrame {
         multiPlayButton.addActionListener(e -> {
             // TODO
         });
+    }
+
+    public User getUser(){
+        String username = usernameField.getText();
+        ImageIcon avatar = (ImageIcon) avatarButton.getIcon();
+        return new User(username,avatar);
     }
 
     /**
@@ -83,6 +97,24 @@ public class MenuFrame extends BaseFrame {
         }
     }
 
+    private void handleAvatarButtonPress() {
+        FileDialog fileDialog = new FileDialog(this, "选择头像", FileDialog.LOAD);
+        fileDialog.setDirectory(System.getProperty("user.home"));
+        fileDialog.setFile("*.png");
+        fileDialog.setVisible(true);
+        String file = fileDialog.getFile();
+        if (file == null) {
+            return;
+        }
+
+        String filePath = fileDialog.getDirectory() + file;
+        // 缩放头像并设置
+        ImageIcon avatar = new ImageIcon(filePath);
+        Image scaledInstance = avatar.getImage().getScaledInstance(48, 48, Image.SCALE_SMOOTH);
+        ImageIcon imageIcon = new ImageIcon(scaledInstance);
+        avatarButton.setIcon(imageIcon);
+    }
+
     private void createUIComponents() {
         helpButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
         title1Button = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
@@ -93,5 +125,6 @@ public class MenuFrame extends BaseFrame {
         title6Button = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
         singlePlayButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
         multiPlayButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        avatarButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
     }
 }

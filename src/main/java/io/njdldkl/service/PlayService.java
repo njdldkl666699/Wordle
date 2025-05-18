@@ -1,6 +1,8 @@
 package io.njdldkl.service;
 
 import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.pojo.Pair;
+import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
 
 import java.util.List;
@@ -13,7 +15,7 @@ public interface PlayService {
     /**
      * 开启新的一局游戏
      */
-    void startGame(int wordLength);
+    void startGame(int wordLength, User user);
 
     /**
      * 检查单词是否有效
@@ -27,9 +29,9 @@ public interface PlayService {
      * 检查单词
      *
      * @param guessWord 猜测单词
-     * @return 单词状态列表
+     * @return 正确与否，单词状态列表
      */
-    List<WordStatus> checkWord(String guessWord);
+    Pair<Boolean,List<WordStatus>> checkWord(String guessWord);
 
     /**
      * 获取正确单词
@@ -37,4 +39,10 @@ public interface PlayService {
      * @return 正确单词
      */
     Word getAnswer();
+
+    /**
+     * 判断是否失败
+     * @return true 失败，false 否则
+     */
+    boolean isFailed();
 }

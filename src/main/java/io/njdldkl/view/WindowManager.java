@@ -1,4 +1,4 @@
-package io.njdldkl;
+package io.njdldkl.view;
 
 import io.njdldkl.view.dialog.EasterEggDialog;
 import io.njdldkl.view.dialog.HelpDialog;
@@ -44,10 +44,11 @@ public class WindowManager {
     public void showSinglePlayFrame() {
         if (singlePlayFrame == null) {
             log.info("创建单人游戏窗口");
-            singlePlayFrame = new SinglePlayFrame();
+            singlePlayFrame = new SinglePlayFrame(menuFrame.getUser());
         }
         menuFrame.setVisible(false);
         singlePlayFrame.setVisible(true);
+        singlePlayFrame.reset();
     }
 
     public void showEasterEggDialog() {

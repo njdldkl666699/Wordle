@@ -1,6 +1,8 @@
 package io.njdldkl.service.impl;
 
 import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.pojo.Pair;
+import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
 import io.njdldkl.service.PlayService;
 import io.njdldkl.util.WordUtils;
@@ -23,7 +25,8 @@ public class SinglePlayService implements PlayService {
      * 单人游戏下，直接重置游戏状态
      */
     @Override
-    public void startGame(int wordLength) {
+    public void startGame(int wordLength, User user) {
+        // 单人模式，user参数暂时不使用
         answer = WordUtils.getRandomWord(wordLength);
         currentGuessCount = 0;
         maxGuessCount = wordLength;
@@ -35,10 +38,6 @@ public class SinglePlayService implements PlayService {
      */
     @Override
     public boolean isValidWord(String word) {
-        if (currentGuessCount >= maxGuessCount) {
-            return false;
-        }
-        currentGuessCount++;
         return WordUtils.isValidWord(word);
     }
 
@@ -46,8 +45,14 @@ public class SinglePlayService implements PlayService {
      * 检查单词
      */
     @Override
-    public List<WordStatus> checkWord(String guessWord) {
-        return WordUtils.checkWord(guessWord, answer.getWord());
+    public Pair<Boolean, List<WordStatus>> checkWord(String guessWord) {
+        currentGuessCount++;
+        List<WordStatus> statusList = WordUtils.checkWord(guessWord, answer.getWord());
+        boolean correct = statusList.stream()
+                .allMatch(status -> status == WordStatus.CORRECT);
+        // NOTE: 多人对战下，将结果和正确玩家存储在service中
+        // 单人游戏下，直接返回结果
+        return new Pair<>(correct, statusList);
     }
 
     /**
@@ -57,5 +62,14 @@ public class SinglePlayService implements PlayService {
     @Override
     public Word getAnswer() {
         return answer;
+    }
+
+    /**
+     * <p>判断是否失败</p>
+     * 单人游戏下，失败条件为猜测次数超过最大次数
+     */
+    @Override
+    public boolean isFailed() {
+        return currentGuessCount >= maxGuessCount;
     }
 }
