@@ -20,16 +20,25 @@ public class SinglePlayService implements PlayService {
     // 最大猜测次数
     private int maxGuessCount;
 
+    // 单人游戏下，当前用户，暂时不使用
+    // NOTE: 多用户对战下，将所有用户都存储起来
+    private User user;
+
+    @Override
+    public void registerUser(User user) {
+        this.user = user;
+    }
+
     /**
      * <p>开启新的一局游戏</p>
      * 单人游戏下，直接重置游戏状态
      */
     @Override
-    public void startGame(int wordLength, User user) {
+    public void startGame(int wordLength) {
         // 单人模式，user参数暂时不使用
         answer = WordUtils.getRandomWord(wordLength);
         currentGuessCount = 0;
-        maxGuessCount = wordLength;
+        maxGuessCount = wordLength + 1;
     }
 
     /**

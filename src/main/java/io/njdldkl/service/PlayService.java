@@ -12,10 +12,12 @@ import java.util.List;
  */
 public interface PlayService {
 
+    void registerUser(User user);
+
     /**
      * 开启新的一局游戏
      */
-    void startGame(int wordLength, User user);
+    void startGame(int wordLength);
 
     /**
      * 检查单词是否有效

@@ -35,9 +35,9 @@ public class KeyboardPanel extends JPanel {
 
     private void initKeyboard() {
         // 创建三行面板
-        JPanel row1Panel = createRowPanel(ROW1, 59);
-        JPanel row2Panel = createRowPanel(ROW2, 66);
-        JPanel row3Panel = createRowPanel(ROW3, 54);
+        JPanel row1Panel = createRowPanel(ROW1, 70);
+        JPanel row2Panel = createRowPanel(ROW2, 78);
+        JPanel row3Panel = createRowPanel(ROW3, 70);
 
         // 添加行间距
         add(row1Panel);

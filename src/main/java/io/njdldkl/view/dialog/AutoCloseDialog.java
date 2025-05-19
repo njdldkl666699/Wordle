@@ -22,6 +22,7 @@ public class AutoCloseDialog extends RoundedShadowDialog {
 
     public AutoCloseDialog(JFrame parent) {
         super(parent);
+        contentPane.setLayout(new BorderLayout());
 
         // 考虑阴影大小，调整对话框尺寸
         Dimension originalSize = DimensionConstant.AUTO_CLOSE_DIALOG;

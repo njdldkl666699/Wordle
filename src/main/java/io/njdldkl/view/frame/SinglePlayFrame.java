@@ -21,6 +21,7 @@ public class SinglePlayFrame extends BaseFrame {
     private final PlayFrameHelper playFrameHelper;
 
     private RoundedButton homeButton;
+    private RoundedButton giveUpButton;
 
     private JScrollPane guessScrollPane;
     private JPanel guessPane;
@@ -42,24 +43,19 @@ public class SinglePlayFrame extends BaseFrame {
     // 字母数量
     protected int letterCount;
 
-    public SinglePlayFrame(User user) {
+    public SinglePlayFrame() {
         setContentPane(contentPane);
 
         playFrameHelper = PlayFrameHelper.builder()
                 .frame(this)
                 .playService(new SinglePlayService())
                 .homeButton(homeButton)
+                .giveUpButton(giveUpButton)
                 .guessScrollPane(guessScrollPane)
                 .guessPane(guessPane)
                 .keyboardPane(keyboardPane)
-                .user(user)
                 .build();
         playFrameHelper.initUI();
-
-        // 默认字母数量为5
-        letterCount = 5;
-        letterButtonGroup.setSelected(letter5RadioButton.getModel(), true);
-        playFrameHelper.updateGuessPane(letterCount);
 
         pack();
         ComponentUtils.setCenterWindowOnScreen(this);
@@ -71,12 +67,12 @@ public class SinglePlayFrame extends BaseFrame {
     }
 
     /**
-     * 重置游戏
+     * 开始游戏
      */
-    public void reset(){
+    public void startGame(User user) {
         letterCount = 5;
         letterButtonGroup.setSelected(letter5RadioButton.getModel(), true);
-        playFrameHelper.updateGuessPane(letterCount);
+        playFrameHelper.updateGuessPane(letterCount, user);
     }
 
     /**
@@ -95,7 +91,7 @@ public class SinglePlayFrame extends BaseFrame {
 
                     // 立即更新字母数量，并更新面板
                     letterCount = newLetterCount;
-                    playFrameHelper.updateGuessPane(newLetterCount);
+                    playFrameHelper.updateGuessPane(newLetterCount, null);
                     keyboardPane.resetKeyboard();
 
                     // 关闭设置面板
@@ -107,6 +103,7 @@ public class SinglePlayFrame extends BaseFrame {
 
     private void createUIComponents() {
         homeButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        giveUpButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
         keyboardPane = new KeyboardPanel();
         guessPane = new JPanel();
         guessPane.setBackground(Color.WHITE);

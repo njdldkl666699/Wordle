@@ -9,7 +9,4 @@ public class EasterEggDialog extends JDialog {
         super(parent, "彩蛋", true);
     }
 
-    public EasterEggDialog() {
-        super((JFrame) null, "彩蛋", true);
-    }
 }
