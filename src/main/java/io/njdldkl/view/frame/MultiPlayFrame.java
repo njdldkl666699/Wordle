@@ -1,6 +1,7 @@
 package io.njdldkl.view.frame;
 
 import io.njdldkl.constant.IntegerConstant;
+import io.njdldkl.pojo.User;
 import io.njdldkl.service.impl.SinglePlayService;
 import io.njdldkl.util.ComponentUtils;
 import io.njdldkl.view.component.KeyboardPanel;
@@ -9,7 +10,7 @@ import io.njdldkl.view.component.RoundedButton;
 import javax.swing.*;
 import java.awt.*;
 
-public class MultiPlayFrame extends BaseFrame{
+public class MultiPlayFrame extends BaseFrame {
 
     private JPanel contentPane;
     private final PlayFrameHelper playFrameHelper;
@@ -23,13 +24,13 @@ public class MultiPlayFrame extends BaseFrame{
 
     private JPanel usersPane;
 
-    public MultiPlayFrame(){
+    public MultiPlayFrame() {
         setContentPane(contentPane);
 
         playFrameHelper = PlayFrameHelper.builder()
                 .frame(this)
                 // TODO 多用户对战服务
-                .playService(new SinglePlayService())
+                .playService(new SinglePlayService(new User(null, null,false)))
                 .homeButton(homeButton)
                 .giveUpButton(giveUpButton)
                 .guessScrollPane(guessScrollPane)

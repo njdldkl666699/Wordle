@@ -67,12 +67,23 @@ public class MenuFrame extends BaseFrame {
 
         // 多人对战按钮
         multiPlayButton.addActionListener(e -> multiPlayPane.setVisible(!multiPlayPane.isVisible()));
+
+        // 创建房间按钮
+        createRoomButton.addActionListener(e -> {
+            log.info("创建房间");
+        });
+
+        // 加入房间按钮
+        joinRoomButton.addActionListener(e -> {
+            // TODO 加入房间逻辑
+            log.debug("加入房间: {}", joinRoomTextField.getText());
+        });
     }
 
     public User getUser() {
         String username = usernameField.getText();
         ImageIcon avatar = (ImageIcon) avatarButton.getIcon();
-        return new User(username, avatar);
+        return new User(username, avatar, false);
     }
 
     /**

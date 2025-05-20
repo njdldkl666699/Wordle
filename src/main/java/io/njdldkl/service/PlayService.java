@@ -12,6 +12,11 @@ import java.util.List;
  */
 public interface PlayService {
 
+    /**
+     * 注册用户
+     *
+     * @param user 用户对象
+     */
     void registerUser(User user);
 
     /**

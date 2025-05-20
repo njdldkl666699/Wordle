@@ -26,6 +26,11 @@ public class Application {
 
     public static void main(String[] args) {
         System.out.println(BANNER);
+        // 在启动时设置DPI感知（Java 9+）
+        // 但是要重新设计UI
+//        System.setProperty("sun.java2d.uiScale", "1");  // 禁用Java自己的缩放
+//        System.setProperty("sun.java2d.dpiaware", "true");  // 启用DPI感知
+
         log.info("Wordle游戏启动");
         // 设置系统外观为系统默认
         try {

@@ -20,4 +20,5 @@ public class ComponentUtils {
 
         component.setLocation(x, y);
     }
+
 }

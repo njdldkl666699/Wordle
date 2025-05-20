@@ -43,8 +43,6 @@ public class PlayFrameHelper {
 
     private PlayService playService;
 
-    private User user;
-
     // 总行数
     private int totalRow;
     // 总列数
@@ -152,7 +150,6 @@ public class PlayFrameHelper {
         // 重置游戏状态
         resetFields(letterCount);
         if (user != null) {
-            this.user = user;
             playService.registerUser(user);
         }
         playService.startGame(letterCount);

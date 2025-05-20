@@ -1,5 +1,6 @@
 package io.njdldkl.view;
 
+import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
 import io.njdldkl.view.dialog.EasterEggDialog;
 import io.njdldkl.view.dialog.GameOverDialog;
@@ -7,6 +8,7 @@ import io.njdldkl.view.dialog.HelpDialog;
 import io.njdldkl.view.frame.MenuFrame;
 import io.njdldkl.view.frame.MultiPlayFrame;
 import io.njdldkl.view.frame.SinglePlayFrame;
+import io.njdldkl.view.frame.WaitingRoomFrame;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -22,12 +24,15 @@ public class WindowManager {
     private MenuFrame menuFrame;
     private SinglePlayFrame singlePlayFrame;
     private MultiPlayFrame multiPlayFrame;
+    private WaitingRoomFrame createRoomFrame;
+    private WaitingRoomFrame joinRoomFrame;
 
     private EasterEggDialog easterEggDialog;
     private HelpDialog helpDialog;
     private GameOverDialog gameOverDialog;
 
-    private WindowManager() {}
+    private WindowManager() {
+    }
 
     public static WindowManager getInstance() {
         if (instance == null) {
@@ -54,13 +59,14 @@ public class WindowManager {
     public void showSinglePlayFrame() {
         if (singlePlayFrame == null) {
             log.info("创建单人游戏窗口");
-            singlePlayFrame = new SinglePlayFrame();
+            singlePlayFrame = new SinglePlayFrame(menuFrame.getUser());
         }
         menuFrame.setVisible(false);
-        singlePlayFrame.startGame(menuFrame.getUser());
+        singlePlayFrame.updateUI(menuFrame.getUser());
         singlePlayFrame.setVisible(true);
     }
 
+    // TODO
     public void showMultiPlayFrame() {
         if (multiPlayFrame == null) {
             log.info("创建多人游戏窗口");
@@ -68,6 +74,30 @@ public class WindowManager {
         }
         menuFrame.setVisible(false);
         multiPlayFrame.setVisible(true);
+    }
+
+    public void showCreateRoomFrame() {
+        if (createRoomFrame == null) {
+            log.info("创建 创建房间窗口");
+            createRoomFrame = new WaitingRoomFrame();
+        }
+        menuFrame.setVisible(false);
+        User user = menuFrame.getUser();
+        User hostUser = new User(user.getName(), user.getAvatar(), true);
+        createRoomFrame.updateUI(hostUser);
+        createRoomFrame.setVisible(true);
+    }
+
+    public void showJoinRoomFrame(){
+        if (joinRoomFrame == null) {
+            log.info("创建 加入房间窗口");
+            joinRoomFrame = new WaitingRoomFrame();
+        }
+        menuFrame.setVisible(false);
+        User user = menuFrame.getUser();
+        User guestUser = new User(user.getName(), user.getAvatar(), false);
+        joinRoomFrame.updateUI(guestUser);
+        joinRoomFrame.setVisible(true);
     }
 
     public void showEasterEggDialog() {
@@ -90,7 +120,7 @@ public class WindowManager {
         if (gameOverDialog == null) {
             log.info("创建游戏结束对话框");
             gameOverDialog = new GameOverDialog(singlePlayFrame);
-            gameOverDialog.addNewGameButtonListener(e->{
+            gameOverDialog.addNewGameButtonListener(e -> {
                 // 单人模式下，返回主菜单即可
                 // 多人模式下，返回主菜单，逻辑待定
                 gameOverDialog.setVisible(false);

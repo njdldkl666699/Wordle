@@ -2,34 +2,26 @@ package io.njdldkl.view.frame;
 
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.IntegerConstant;
+import io.njdldkl.net.Client;
+import io.njdldkl.net.Server;
 import io.njdldkl.pojo.User;
-import io.njdldkl.service.impl.SinglePlayService;
 import io.njdldkl.util.ComponentUtils;
-import io.njdldkl.view.component.KeyboardPanel;
 import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.component.RoundedRadioButton;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.Enumeration;
 
 @Slf4j
-public class SinglePlayFrame extends BaseFrame {
+public class WaitingRoomFrame extends BaseFrame {
 
     private JPanel contentPane;
-    private final PlayFrameHelper playFrameHelper;
-
-    private RoundedButton homeButton;
-    private RoundedButton giveUpButton;
-
-    private JScrollPane guessScrollPane;
-    private JPanel guessPane;
-    private KeyboardPanel keyboardPane;
+    private Client client;
+    private Server server;
 
     private RoundedButton settingsButton;
     private JPanel settingsPane;
-
     private RoundedRadioButton letter4RadioButton;
     private RoundedRadioButton letter5RadioButton;
     private RoundedRadioButton letter6RadioButton;
@@ -40,45 +32,60 @@ public class SinglePlayFrame extends BaseFrame {
     private RoundedRadioButton letter11RadioButton;
     private ButtonGroup letterButtonGroup;
 
-    // 字母数量
-    protected int letterCount;
+    private JPanel roomIdPane;
+    private JLabel roomIdLabel;
+    private JTextField roomIdTextPane;
+    private JPanel usersPane;
+    private RoundedButton startButton;
 
-    public SinglePlayFrame(User user) {
+    // 房间ID
+    private int roomId;
+    // 字母数量，只有房主的设置有效
+    private int letterCount;
+
+    public WaitingRoomFrame() {
         setContentPane(contentPane);
-
-        playFrameHelper = PlayFrameHelper.builder()
-                .frame(this)
-                .playService(new SinglePlayService(user))
-                .homeButton(homeButton)
-                .giveUpButton(giveUpButton)
-                .guessScrollPane(guessScrollPane)
-                .guessPane(guessPane)
-                .keyboardPane(keyboardPane)
-                .build();
-        playFrameHelper.initUI();
-
         pack();
         ComponentUtils.setCenterWindowOnScreen(this);
 
-        playFrameHelper.setListeners();
-        // 设置面板
         setupLetterButtonGroupListener();
         settingsButton.addActionListener(e -> settingsPane.setVisible(!settingsPane.isVisible()));
+
+        // TODO
+        startButton.addActionListener(e->{});
     }
 
-    /**
-     * 开始游戏
-     */
     public void updateUI(User user) {
+        if(!user.isHost()){
+            // 如果不是房主，则隐藏设置按钮和开始按钮
+            settingsButton.setVisible(false);
+            settingsPane.setVisible(false);
+            startButton.setVisible(false);
+        }
+
         letterCount = 5;
         letterButtonGroup.setSelected(letter5RadioButton.getModel(), true);
-        playFrameHelper.updateGuessPane(letterCount, user);
+
+        usersPane.removeAll();
+        usersPane.revalidate();
+        usersPane.repaint();
+
+        // TODO 设置房间ID
+        roomIdTextPane.setText("123456");
+    }
+
+    private void addUserToRoom(User user) {
+        // TODO 添加用户到房间
+        JLabel userLabel = new JLabel(user.getName());
+        usersPane.add(userLabel);
+        usersPane.revalidate();
+        usersPane.repaint();
     }
 
     /**
      * 为所有字母数量按钮添加监听器
      */
-    private void setupLetterButtonGroupListener() {
+    private void setupLetterButtonGroupListener(){
         // 为按钮组中的所有按钮添加ActionListener
         Enumeration<AbstractButton> buttons = letterButtonGroup.getElements();
         while (buttons.hasMoreElements()) {
@@ -89,26 +96,14 @@ public class SinglePlayFrame extends BaseFrame {
                     int newLetterCount = Integer.parseInt(button.getActionCommand());
                     log.info("字母数量已更改为: {}", newLetterCount);
 
-                    // 立即更新字母数量，并更新面板
                     letterCount = newLetterCount;
-                    playFrameHelper.updateGuessPane(newLetterCount, null);
-                    keyboardPane.resetKeyboard();
-
-                    // 关闭设置面板
                     settingsPane.setVisible(false);
                 }
             });
         }
     }
 
-    private void createUIComponents() {
-        homeButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
-        giveUpButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
-        keyboardPane = new KeyboardPanel();
-        guessPane = new JPanel();
-        guessPane.setBackground(Color.WHITE);
-        guessPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+    private void createUIComponents(){
         // 设置按钮
         settingsButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
         letter4RadioButton = new RoundedRadioButton(IntegerConstant.SHARP_RADIUS, ColorConstant.RADIO_NORMAL, ColorConstant.GREEN);

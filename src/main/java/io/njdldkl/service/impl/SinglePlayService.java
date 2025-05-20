@@ -11,6 +11,10 @@ import java.util.List;
 
 public class SinglePlayService implements PlayService {
 
+    public SinglePlayService(User user){
+        this.user = user;
+    }
+
     // 正确单词
     private Word answer;
 
