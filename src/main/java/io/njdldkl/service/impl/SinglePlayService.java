@@ -29,7 +29,7 @@ public class SinglePlayService implements PlayService {
     private User user;
 
     @Override
-    public void registerUser(User user) {
+    public void registerUser(User user, boolean host, String roomId) {
         this.user = user;
     }
 

@@ -72,7 +72,7 @@ public class SinglePlayFrame extends BaseFrame {
     public void updateUI(User user) {
         letterCount = 5;
         letterButtonGroup.setSelected(letter5RadioButton.getModel(), true);
-        playFrameHelper.updateGuessPane(letterCount, user);
+        playFrameHelper.updateGuessPane(letterCount, user, true, null);
     }
 
     /**
@@ -91,7 +91,7 @@ public class SinglePlayFrame extends BaseFrame {
 
                     // 立即更新字母数量，并更新面板
                     letterCount = newLetterCount;
-                    playFrameHelper.updateGuessPane(newLetterCount, null);
+                    playFrameHelper.updateGuessPane(newLetterCount, null, true, null);
                     keyboardPane.resetKeyboard();
 
                     // 关闭设置面板

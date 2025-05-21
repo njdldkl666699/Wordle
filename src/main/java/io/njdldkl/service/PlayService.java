@@ -15,9 +15,11 @@ public interface PlayService {
     /**
      * 注册用户
      *
-     * @param user 用户对象
+     * @param user   用户对象
+     * @param host
+     * @param roomId
      */
-    void registerUser(User user);
+    void registerUser(User user, boolean host, String roomId);
 
     /**
      * 开启新的一局游戏

@@ -146,11 +146,11 @@ public class PlayFrameHelper {
     /**
      * 根据字母数量更新猜单词面板
      */
-    public void updateGuessPane(int letterCount, User user) {
+    public void updateGuessPane(int letterCount, User user, boolean host,String roomId) {
         // 重置游戏状态
         resetFields(letterCount);
         if (user != null) {
-            playService.registerUser(user);
+            playService.registerUser(user,host , roomId);
         }
         playService.startGame(letterCount);
 

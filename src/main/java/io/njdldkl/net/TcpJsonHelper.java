@@ -2,6 +2,7 @@ package io.njdldkl.net;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import io.njdldkl.pojo.BaseMessage;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -53,9 +54,9 @@ public class TcpJsonHelper {
     /**
      * 发送JSON数据
      */
-    public void sendJsonFromObject(Object object) throws IOException {
+    public void sendMessage(BaseMessage message) throws IOException {
         // 将对象转换为JSON对象
-        JSONObject json = JSONObject.from(object);
+        JSONObject json = JSONObject.from(message);
         byte[] jsonBytes = JSON.toJSONBytes(json);
         output.write(jsonBytes);
         output.write(DELIMITER);
@@ -88,7 +89,9 @@ public class TcpJsonHelper {
                     try {
                         // 解析JSON消息并处理
                         JSONObject jsonObject = JSON.parseObject(messageBytes);
-                        messageHandler.handleMessage(jsonObject);
+                        // 转换为BaseMessage对象
+                        BaseMessage message = jsonObject.toJavaObject(BaseMessage.class);
+                        messageHandler.receiveMessage(message);
                     } catch (Exception e) {
                         messageHandler.onError(e);
                     }
@@ -128,5 +131,21 @@ public class TcpJsonHelper {
             return i;
         }
         return -1;
+    }
+
+    /**
+     * 异步消息处理器接口
+     */
+    public static interface MessageHandler {
+
+        /**
+         * 处理接收到的JSON消息
+         */
+        void receiveMessage(BaseMessage message);
+
+        /**
+         * 处理异常
+         */
+        void onError(Exception e);
     }
 }

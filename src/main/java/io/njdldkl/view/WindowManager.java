@@ -82,21 +82,18 @@ public class WindowManager {
             createRoomFrame = new WaitingRoomFrame();
         }
         menuFrame.setVisible(false);
-        User user = menuFrame.getUser();
-        User hostUser = new User(user.getName(), user.getAvatar(), true);
-        createRoomFrame.updateUI(hostUser);
+        // TODO 生成id
+        createRoomFrame.updateUI(menuFrame.getUser(), true, "localhost");
         createRoomFrame.setVisible(true);
     }
 
-    public void showJoinRoomFrame(){
+    public void showJoinRoomFrame() {
         if (joinRoomFrame == null) {
             log.info("创建 加入房间窗口");
             joinRoomFrame = new WaitingRoomFrame();
         }
         menuFrame.setVisible(false);
-        User user = menuFrame.getUser();
-        User guestUser = new User(user.getName(), user.getAvatar(), false);
-        joinRoomFrame.updateUI(guestUser);
+        joinRoomFrame.updateUI(menuFrame.getUser(), false, menuFrame.getRoomId());
         joinRoomFrame.setVisible(true);
     }
 

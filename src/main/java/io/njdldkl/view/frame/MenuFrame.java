@@ -12,6 +12,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
 import java.util.Arrays;
+import java.util.UUID;
 
 @Slf4j
 public class MenuFrame extends BaseFrame {
@@ -43,10 +44,14 @@ public class MenuFrame extends BaseFrame {
 
     private final boolean[] titleButtonsPressed = new boolean[6];
 
+    private final User user;
+
     public MenuFrame() {
         setContentPane(contentPane);
         pack();
         ComponentUtils.setCenterWindowOnScreen(this);
+
+        user = new User(UUID.randomUUID(), "User", (ImageIcon) avatarButton.getIcon());
 
         // 头像按钮
         avatarButton.addActionListener(e -> handleAvatarButtonPress());
@@ -69,21 +74,20 @@ public class MenuFrame extends BaseFrame {
         multiPlayButton.addActionListener(e -> multiPlayPane.setVisible(!multiPlayPane.isVisible()));
 
         // 创建房间按钮
-        createRoomButton.addActionListener(e -> {
-            log.info("创建房间");
-        });
+        createRoomButton.addActionListener(e -> WindowManager.getInstance().showCreateRoomFrame());
 
         // 加入房间按钮
-        joinRoomButton.addActionListener(e -> {
-            // TODO 加入房间逻辑
-            log.debug("加入房间: {}", joinRoomTextField.getText());
-        });
+        joinRoomButton.addActionListener(e -> WindowManager.getInstance().showJoinRoomFrame());
     }
 
     public User getUser() {
-        String username = usernameField.getText();
-        ImageIcon avatar = (ImageIcon) avatarButton.getIcon();
-        return new User(username, avatar, false);
+        user.setName(usernameField.getText());
+        user.setAvatar((ImageIcon) avatarButton.getIcon());
+        return user;
+    }
+
+    public String getRoomId() {
+        return joinRoomTextField.getText();
     }
 
     /**

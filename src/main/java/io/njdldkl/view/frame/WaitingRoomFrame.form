@@ -264,8 +264,8 @@
     </children>
   </grid>
   <buttonGroups>
-    <group name="letterButtonGroup">
-      <member id="81510"/>
+    <group name="letterButtonGroup" bound="true">
+      <member id="858c5"/>
       <member id="447c2"/>
       <member id="f6b55"/>
       <member id="e06cb"/>
@@ -273,7 +273,6 @@
       <member id="81510"/>
       <member id="6d0c4"/>
       <member id="4d906"/>
-      <member id="858c5"/>
     </group>
   </buttonGroups>
 </form>
