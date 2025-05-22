@@ -35,6 +35,7 @@ public class WaitingRoomFrame extends BaseFrame {
     private JTextField roomIdTextPane;
     private JPanel usersPane;
     private RoundedButton startButton;
+    private RoundedButton leaveRoomButton;
 
     private MultiPlayService playService;
 

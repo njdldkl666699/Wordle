@@ -1,5 +1,7 @@
 package io.njdldkl;
 
+import com.alibaba.fastjson2.JSON;
+import io.njdldkl.pojo.User;
 import io.njdldkl.view.WindowManager;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +27,9 @@ public class Application {
     }
 
     public static void main(String[] args) {
+        JSON.register(ImageIcon.class,new User.ImageIconSerializer());
+        JSON.register(ImageIcon.class,new User.ImageIconDeserializer());
+
         System.out.println(BANNER);
         // 在启动时设置DPI感知（Java 9+）
         // 但是要重新设计UI

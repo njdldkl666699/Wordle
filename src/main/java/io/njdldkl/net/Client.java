@@ -1,5 +1,6 @@
 package io.njdldkl.net;
 
+import com.alibaba.fastjson2.JSONObject;
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.BaseMessage;
 import io.njdldkl.pojo.User;
@@ -67,6 +68,7 @@ public class Client {
 
     /**
      * 离开房间
+     *
      * @param userId 用户ID
      */
     public void leaveRoom(UUID userId) throws IOException {
@@ -116,17 +118,16 @@ public class Client {
      */
     private class ClientMessageHandler implements TcpJsonHelper.MessageHandler {
         @Override
-        public void receiveMessage(BaseMessage message) {
-            log.debug("收到服务器消息: {}", message);
-            String type = message.getType();
-            switch (type){
-                case "JoinRoomResponse" -> onJoinRoomResponse((JoinRoomResponse) message);
+        public void receiveMessage(JSONObject jsonObject, String type) {
+            log.debug("收到服务器消息: {}", jsonObject);
+            switch (type) {
+                case "JoinRoomResponse" -> onJoinRoomResponse(jsonObject.toJavaObject(JoinRoomResponse.class));
             }
         }
 
         @Override
         public void onError(Exception e) {
-            log.error("消息处理错误: {}", e.getMessage(), e);
+            log.error("消息处理错误: ", e);
             // 如果有等待中的请求，让它们失败
         }
     }

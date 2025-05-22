@@ -1,5 +1,6 @@
 package io.njdldkl.net;
 
+import com.alibaba.fastjson2.JSONObject;
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.BaseMessage;
 import io.njdldkl.pojo.User;
@@ -125,15 +126,14 @@ public class Server {
 
     private class ServerMessageHandler implements TcpJsonHelper.MessageHandler {
         @Override
-        public void receiveMessage(BaseMessage message) {
-            log.debug("从客户端接收到数据: {}", message);
-            String type = message.getType();
+        public void receiveMessage(JSONObject jsonObject, String type) {
+            log.debug("从客户端接收到数据: {}", jsonObject);
             try {
                 switch (type) {
-                    case "JoinRoomRequest" -> joinRoom((JoinRoomRequest) message);
+                    case "JoinRoomRequest" -> joinRoom(jsonObject.toJavaObject(JoinRoomRequest.class));
                     case "LeaveRoomRequest" -> {
                         // 处理离开房间请求
-                        log.info("处理离开房间请求: {}", message);
+                        log.info("处理离开房间请求: {}", jsonObject);
                     }
                     default -> log.warn("未知消息类型: {}", type);
                 }
@@ -144,7 +144,7 @@ public class Server {
 
         @Override
         public void onError(Exception e) {
-            log.error("发生异常: {}", e.getMessage(), e);
+            log.error("发生异常: ", e);
         }
     }
 }

@@ -1,8 +1,10 @@
 package io.njdldkl.pojo;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class BaseMessage {
 
     public BaseMessage() {
