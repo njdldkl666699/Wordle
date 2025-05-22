@@ -122,8 +122,7 @@ public class Server {
         if (userId.equals(hostUser.getId())) {
             log.info("房主 {} 离开房间", userId);
             // 如果房主离开，广播给所有用户
-            HostLeftResponse hostLeftResponse = new HostLeftResponse();
-            broadcastToAllClients(hostLeftResponse);
+            broadcastToAllClients(new HostLeftResponse());
             // 关闭服务器
             close();
             log.info("服务器已关闭");

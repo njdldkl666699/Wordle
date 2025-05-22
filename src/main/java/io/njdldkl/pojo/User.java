@@ -5,7 +5,9 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.alibaba.fastjson2.reader.ObjectReader;
 import com.alibaba.fastjson2.writer.ObjectWriter;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
@@ -13,7 +15,6 @@ import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Base64;
 import java.util.UUID;

@@ -1,7 +1,7 @@
 package io.njdldkl.view;
 
-import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
+import io.njdldkl.util.IpNumberUtils;
 import io.njdldkl.view.dialog.EasterEggDialog;
 import io.njdldkl.view.dialog.GameOverDialog;
 import io.njdldkl.view.dialog.HelpDialog;
@@ -53,10 +53,10 @@ public class WindowManager {
         if (multiPlayFrame != null) {
             multiPlayFrame.setVisible(false);
         }
-        if(createRoomFrame != null) {
+        if (createRoomFrame != null) {
             createRoomFrame.setVisible(false);
         }
-        if(joinRoomFrame != null) {
+        if (joinRoomFrame != null) {
             joinRoomFrame.setVisible(false);
         }
         menuFrame.setVisible(true);
@@ -88,8 +88,8 @@ public class WindowManager {
             createRoomFrame = new WaitingRoomFrame();
         }
         menuFrame.setVisible(false);
-        // TODO 生成id
-        createRoomFrame.updateUI(menuFrame.getUser(), true, "localhost");
+        createRoomFrame.updateUI(menuFrame.getUser(), true,
+                IpNumberUtils.addressToRoomId(IpNumberUtils.getLocalHostAddress()));
         createRoomFrame.setVisible(true);
     }
 

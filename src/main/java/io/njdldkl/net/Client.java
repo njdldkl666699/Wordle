@@ -7,11 +7,11 @@ import io.njdldkl.pojo.request.JoinRoomRequest;
 import io.njdldkl.pojo.request.LeaveRoomRequest;
 import io.njdldkl.pojo.response.JoinRoomResponse;
 import io.njdldkl.pojo.response.LeaveRoomResponse;
+import io.njdldkl.util.IpNumberUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.UUID;
@@ -51,8 +51,7 @@ public class Client {
      */
     public void connect(User user, String roomId) throws IOException {
         // 通过房间ID解析服务器地址，端口已知
-        // TODO 实现房间ID解析逻辑
-        String host = roomId;
+        String host = IpNumberUtils.roomIdToAddress(roomId);
         serverSocket = new Socket(host, IntegerConstant.PORT);
         log.info("连接到服务器： {}:{}", host, IntegerConstant.PORT);
 
@@ -79,9 +78,6 @@ public class Client {
     public void leaveRoom(UUID userId) throws IOException {
         log.info("离开房间: {}", userId);
         tcpHelper.sendMessage(new LeaveRoomRequest(userId));
-        // 关闭连接
-        close();
-        log.info("离开房间成功，关闭连接");
     }
 
     /**
