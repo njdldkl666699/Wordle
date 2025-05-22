@@ -11,6 +11,7 @@ import io.njdldkl.view.component.RoundedRadioButton;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -51,6 +52,9 @@ public class WaitingRoomFrame extends BaseFrame {
         setContentPane(contentPane);
         pack();
         ComponentUtils.setCenterWindowOnScreen(this);
+
+        // 初始化用户面板
+        usersPane.setLayout(new FlowLayout(FlowLayout.LEFT,10,10));
 
         setupLetterButtonGroupListener();
         setupPlayService();
@@ -114,16 +118,42 @@ public class WaitingRoomFrame extends BaseFrame {
     }
 
     private void addUserToRoom(User user) {
-        JLabel userLabel = new JLabel(user.getName());
-        // 如果是当前用户，可以添加特殊标记
-        if (currentUser != null && user.getId().equals(currentUser.getId())) {
-            userLabel.setText(user.getName() + " (你)");
-        }
-        // 如果是房主，添加标记
+        // 创建用户面板
+        JPanel userPanel = new JPanel();
+        userPanel.setLayout(new BorderLayout());
+        userPanel.setPreferredSize(new Dimension(180, 90)); // 设置固定大小
+        userPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        // 添加用户头像
+        JLabel avatarLabel = new JLabel(user.getAvatar());
+        avatarLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        userPanel.add(avatarLabel, BorderLayout.CENTER);
+
+        // 添加用户名称
+        JLabel nameLabel = new JLabel(user.getName());
+        nameLabel.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+        nameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        userPanel.add(nameLabel, BorderLayout.SOUTH);
+
+        // 设置背景色
         if (playService != null && playService.isHost(user)) {
-            userLabel.setText(userLabel.getText() + " [房主]");
+            // 房主背景色为绿色
+            userPanel.setBackground(ColorConstant.GREEN);
+            nameLabel.setText(nameLabel.getText() + " [房主]");
         }
-        usersPane.add(userLabel);
+
+        if (currentUser != null && user.getId().equals(currentUser.getId())) {
+            // 当前用户背景色为黄色，但如果是房主则保持绿色
+            if (playService != null && !playService.isHost(user)) {
+                userPanel.setBackground(ColorConstant.YELLOW);
+            }
+            nameLabel.setText(nameLabel.getText() + " (你)");
+        }
+
+        // 为面板添加边框
+        userPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+        usersPane.add(userPanel);
     }
 
     private void leaveRoom(){
