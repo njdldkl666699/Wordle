@@ -14,7 +14,7 @@ import java.util.List;
 public class JoinRoomResponse extends BaseMessage {
 
     // 所有用户（除了房主）
-    private List<User> users;
+    private List<User> userList;
     // 房主
     private User host;
 }

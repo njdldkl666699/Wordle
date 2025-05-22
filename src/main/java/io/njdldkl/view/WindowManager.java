@@ -53,6 +53,12 @@ public class WindowManager {
         if (multiPlayFrame != null) {
             multiPlayFrame.setVisible(false);
         }
+        if(createRoomFrame != null) {
+            createRoomFrame.setVisible(false);
+        }
+        if(joinRoomFrame != null) {
+            joinRoomFrame.setVisible(false);
+        }
         menuFrame.setVisible(true);
     }
 

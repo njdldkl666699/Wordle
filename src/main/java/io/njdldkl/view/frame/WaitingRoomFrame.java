@@ -5,6 +5,7 @@ import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.User;
 import io.njdldkl.service.impl.MultiPlayService;
 import io.njdldkl.util.ComponentUtils;
+import io.njdldkl.view.WindowManager;
 import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.component.RoundedRadioButton;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,8 @@ public class WaitingRoomFrame extends BaseFrame {
         // TODO
         startButton.addActionListener(e -> {
         });
+
+        leaveRoomButton.addActionListener(e -> leaveRoom());
     }
 
     public void updateUI(User user, boolean host, String roomId) {
@@ -89,11 +92,14 @@ public class WaitingRoomFrame extends BaseFrame {
         // 如果之前有服务，先移除回调
         if (playService != null) {
             playService.removeUserListUpdateCallback(this::updateUsersList);
+            playService.removeHostLeftCallback(this::leaveRoom);
         }
 
         playService = new MultiPlayService();
         // 注册用户列表更新的回调
         playService.addUserListUpdateCallback(this::updateUsersList);
+        // 注册房主离开的回调
+        playService.addHostLeftCallback(this::leaveRoom);
     }
 
     /**
@@ -118,6 +124,13 @@ public class WaitingRoomFrame extends BaseFrame {
             userLabel.setText(userLabel.getText() + " [房主]");
         }
         usersPane.add(userLabel);
+    }
+
+    private void leaveRoom(){
+        if (playService != null) {
+            playService.leaveRoom(currentUser);
+            WindowManager.getInstance().showMenuFrame();
+        }
     }
 
     /**
@@ -154,6 +167,7 @@ public class WaitingRoomFrame extends BaseFrame {
         letter11RadioButton = new RoundedRadioButton(IntegerConstant.SHARP_RADIUS, ColorConstant.RADIO_NORMAL, ColorConstant.GREEN);
 
         startButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
+        leaveRoomButton = new RoundedButton(IntegerConstant.SMOOTH_RADIUS);
     }
 
 }

@@ -2,15 +2,16 @@ package io.njdldkl.net;
 
 import com.alibaba.fastjson2.JSONObject;
 import io.njdldkl.constant.IntegerConstant;
-import io.njdldkl.pojo.BaseMessage;
 import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.request.JoinRoomRequest;
 import io.njdldkl.pojo.request.LeaveRoomRequest;
 import io.njdldkl.pojo.response.JoinRoomResponse;
+import io.njdldkl.pojo.response.LeaveRoomResponse;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +28,10 @@ public class Client {
     // 用户列表更新的监听器
     @Setter
     private UserListUpdateListener userListUpdateListener;
+
+    // 房主离开房间的监听器
+    @Setter
+    private Runnable hostLeftListener;
 
     // 用户列表更新的监听器接口
     public interface UserListUpdateListener {
@@ -72,7 +77,11 @@ public class Client {
      * @param userId 用户ID
      */
     public void leaveRoom(UUID userId) throws IOException {
+        log.info("离开房间: {}", userId);
         tcpHelper.sendMessage(new LeaveRoomRequest(userId));
+        // 关闭连接
+        close();
+        log.info("离开房间成功，关闭连接");
     }
 
     /**
@@ -103,13 +112,29 @@ public class Client {
     }
 
     private void onJoinRoomResponse(JoinRoomResponse response) {
-        User hostUser = response.getHost();
-        List<User> users = response.getUsers();
         log.info("加入房间成功: {}", response);
+        User hostUser = response.getHost();
+        List<User> users = response.getUserList();
 
         // 如果有监听器，通知用户列表已更新
         if (userListUpdateListener != null) {
             userListUpdateListener.onUpdated(users, hostUser);
+        }
+    }
+
+    private void onLeaveRoomResponse(LeaveRoomResponse response) {
+        log.info("离开房间成功: {}", response);
+        List<User> users = response.getUserList();
+        // 如果有监听器，通知用户列表已更新
+        if (userListUpdateListener != null) {
+            userListUpdateListener.onUpdated(users, null);
+        }
+    }
+
+    private void onHostLeft() {
+        log.info("房主已离开房间");
+        if (hostLeftListener != null) {
+            hostLeftListener.run();
         }
     }
 
@@ -119,9 +144,10 @@ public class Client {
     private class ClientMessageHandler implements TcpJsonHelper.MessageHandler {
         @Override
         public void receiveMessage(JSONObject jsonObject, String type) {
-            log.debug("收到服务器消息: {}", jsonObject);
             switch (type) {
                 case "JoinRoomResponse" -> onJoinRoomResponse(jsonObject.toJavaObject(JoinRoomResponse.class));
+                case "LeaveRoomResponse" -> onLeaveRoomResponse(jsonObject.toJavaObject(LeaveRoomResponse.class));
+                case "HostLeftResponse" -> onHostLeft();
             }
         }
 

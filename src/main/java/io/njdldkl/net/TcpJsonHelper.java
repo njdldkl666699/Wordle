@@ -91,7 +91,7 @@ public class TcpJsonHelper {
                         JSONObject jsonObject = JSON.parseObject(messageBytes);
                         // 获取消息类型
                         String type = jsonObject.getString("type");
-                        messageHandler.receiveMessage(jsonObject,type);
+                        messageHandler.receiveMessage(jsonObject, type);
                     } catch (Exception e) {
                         messageHandler.onError(e);
                     }
@@ -141,7 +141,7 @@ public class TcpJsonHelper {
         /**
          * 处理接收到的JSON消息
          */
-        void receiveMessage(JSONObject jsonObject,String type);
+        void receiveMessage(JSONObject jsonObject, String type);
 
         /**
          * 处理异常

@@ -5,12 +5,17 @@ import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.BaseMessage;
 import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.request.JoinRoomRequest;
+import io.njdldkl.pojo.request.LeaveRoomRequest;
+import io.njdldkl.pojo.response.HostLeftResponse;
 import io.njdldkl.pojo.response.JoinRoomResponse;
+import io.njdldkl.pojo.response.LeaveRoomResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -61,16 +66,11 @@ public class Server {
 
     private void handleClient(Socket clientSocket) {
         try {
-            log.info("客户端已连接: {}", clientSocket.getRemoteSocketAddress());
+            SocketAddress address = clientSocket.getRemoteSocketAddress();
+            log.info("客户端已连接: {}", address);
             TcpJsonHelper tcpHelper = new TcpJsonHelper(clientSocket, new ServerMessageHandler());
             tcpHelper.startReceiver();
             clientConnections.add(tcpHelper);
-
-            // 思考：需要吗
-            // 保持连接直到客户端断开
-//            while (!clientSocket.isClosed()) {
-//                Thread.sleep(1000); // 减少CPU使用率
-//            }
         } catch (Exception e) {
             log.info("客户端处理发生异常: {}", e.getMessage(), e);
         }
@@ -88,10 +88,7 @@ public class Server {
             }
         }
 
-        // 关闭所有客户端连接
-        for (TcpJsonHelper tcpHelper : clientConnections) {
-            tcpHelper.close();
-        }
+        // 清空客户端连接
         clientConnections.clear();
     }
 
@@ -107,7 +104,7 @@ public class Server {
 
         // 创建加入房间响应
         JoinRoomResponse joinRoomResponse = JoinRoomResponse.builder()
-                .users(new ArrayList<>(users.values()))
+                .userList(new ArrayList<>(users.values()))
                 .host(hostUser)
                 .build();
 
@@ -116,35 +113,77 @@ public class Server {
     }
 
     /**
+     * 离开房间
+     */
+    private void leaveRoom(LeaveRoomRequest request) throws IOException {
+        log.info("用户 {} 离开房间", request);
+
+        UUID userId = request.getUserId();
+        if (userId.equals(hostUser.getId())) {
+            log.info("房主 {} 离开房间", userId);
+            // 如果房主离开，广播给所有用户
+            HostLeftResponse hostLeftResponse = new HostLeftResponse();
+            broadcastToAllClients(hostLeftResponse);
+            // 关闭服务器
+            close();
+            log.info("服务器已关闭");
+            return;
+        }
+
+        // 从房间中移除用户
+        users.remove(userId);
+
+        // 创建离开房间响应
+        LeaveRoomResponse leaveRoomResponse =
+                new LeaveRoomResponse(new ArrayList<>(users.values()));
+        // 广播给所有连接的客户端
+        broadcastToAllClients(leaveRoomResponse);
+    }
+
+    /**
      * 广播消息给所有连接的客户端
      */
-    private void broadcastToAllClients(BaseMessage message) throws IOException {
+    private void broadcastToAllClients(BaseMessage message) {
+        List<TcpJsonHelper> invalidConnections = new ArrayList<>();
+
         for (TcpJsonHelper tcpHelper : clientConnections) {
-            tcpHelper.sendMessage(message);
+            try {
+                tcpHelper.sendMessage(message);
+            } catch (IOException e) {
+                // 记录无效连接，稍后移除
+                log.info("向客户端发送消息失败，连接可能已关闭: {}", e.getMessage());
+                invalidConnections.add(tcpHelper);
+            }
+        }
+
+        // 移除无效连接
+        if (!invalidConnections.isEmpty()) {
+            clientConnections.removeAll(invalidConnections);
+            log.info("已移除 {} 个无效连接", invalidConnections.size());
         }
     }
 
     private class ServerMessageHandler implements TcpJsonHelper.MessageHandler {
         @Override
         public void receiveMessage(JSONObject jsonObject, String type) {
-            log.debug("从客户端接收到数据: {}", jsonObject);
             try {
                 switch (type) {
                     case "JoinRoomRequest" -> joinRoom(jsonObject.toJavaObject(JoinRoomRequest.class));
-                    case "LeaveRoomRequest" -> {
-                        // 处理离开房间请求
-                        log.info("处理离开房间请求: {}", jsonObject);
-                    }
+                    case "LeaveRoomRequest" -> leaveRoom(jsonObject.toJavaObject(LeaveRoomRequest.class));
                     default -> log.warn("未知消息类型: {}", type);
                 }
             } catch (IOException e) {
-                log.error("处理消息时发生异常: {}", e.getMessage(), e);
+                log.error("处理消息时发生异常: ", e);
             }
         }
 
         @Override
         public void onError(Exception e) {
-            log.error("发生异常: ", e);
+            if(e instanceof SocketException){
+                log.info("客户端连接已关闭: {}", e.getMessage());
+            } else {
+                log.error("发生异常: ", e);
+            }
         }
     }
 }

@@ -1,15 +1,16 @@
 package io.njdldkl.pojo.response;
 
 import io.njdldkl.pojo.BaseMessage;
+import io.njdldkl.pojo.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.UUID;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 public class LeaveRoomResponse extends BaseMessage {
 
-    // 离开房间的用户id
-    private UUID userId;
+    // 用户id列表
+    private List<User> userList;
 }
