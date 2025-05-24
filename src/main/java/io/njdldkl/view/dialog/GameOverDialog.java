@@ -15,16 +15,15 @@ public class GameOverDialog extends RoundedShadowDialog {
 
     private final JPanel titlePanel;
     private final JLabel titleLabel;
-    private RoundedButton newGameButton;
+    private RoundedButton backHomeButton;
 
     private final JPanel textPanel;
 
     public GameOverDialog(JFrame parent) {
         super(parent);
         Dimension originalSize = new Dimension(270, 480);
-        setSize(new Dimension(
-                originalSize.width + IntegerConstant.SHADOW_SIZE * 2,
-                originalSize.height + IntegerConstant.SHADOW_SIZE * 2));
+        setSize(originalSize.width + IntegerConstant.SHADOW_SIZE * 2,
+                originalSize.height + IntegerConstant.SHADOW_SIZE * 2);
         ComponentUtils.setCenterWindowOnScreen(this);
         setResizable(false);
 
@@ -60,19 +59,19 @@ public class GameOverDialog extends RoundedShadowDialog {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         // 设置关闭按钮
-        newGameButton = new RoundedButton(IntegerConstant.SHARP_RADIUS);
-        newGameButton.setText("返回菜单");
-        newGameButton.setFont(new Font("Microsoft YaHei", Font.BOLD, 24));
-        newGameButton.setBackground(ColorConstant.GREEN);
-        newGameButton.setForeground(Color.WHITE);
-        newGameButton.setPreferredSize(new Dimension(135, 36));
-        buttonPanel.add(newGameButton);
+        backHomeButton = new RoundedButton(IntegerConstant.SHARP_RADIUS);
+        backHomeButton.setText("返回菜单");
+        backHomeButton.setFont(new Font("Microsoft YaHei", Font.BOLD, 24));
+        backHomeButton.setBackground(ColorConstant.GREEN);
+        backHomeButton.setForeground(Color.WHITE);
+        backHomeButton.setPreferredSize(new Dimension(135, 36));
+        buttonPanel.add(backHomeButton);
 
-        newGameButton.addActionListener(e -> dispose());
+        backHomeButton.addActionListener(e -> dispose());
     }
 
-    public void addNewGameButtonListener(ActionListener listener) {
-        newGameButton.addActionListener(listener);
+    public void addBackHomeButtonListener(ActionListener listener) {
+        backHomeButton.addActionListener(listener);
     }
 
     @Override

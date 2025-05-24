@@ -3,8 +3,10 @@ package io.njdldkl.view.frame;
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.User;
+import io.njdldkl.service.PlayService;
 import io.njdldkl.service.impl.SinglePlayService;
 import io.njdldkl.util.ComponentUtils;
+import io.njdldkl.view.WindowManager;
 import io.njdldkl.view.component.KeyboardPanel;
 import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.component.RoundedRadioButton;
@@ -19,6 +21,7 @@ public class SinglePlayFrame extends BaseFrame {
 
     private JPanel contentPane;
     private final PlayFrameHelper playFrameHelper;
+    private PlayService singlePlayService;
 
     private RoundedButton homeButton;
     private RoundedButton giveUpButton;
@@ -46,10 +49,11 @@ public class SinglePlayFrame extends BaseFrame {
     public SinglePlayFrame(User user) {
         setContentPane(contentPane);
 
+        singlePlayService = new SinglePlayService(user);
+
         playFrameHelper = PlayFrameHelper.builder()
                 .frame(this)
-                .playService(new SinglePlayService(user))
-                .homeButton(homeButton)
+                .playService(singlePlayService)
                 .giveUpButton(giveUpButton)
                 .guessScrollPane(guessScrollPane)
                 .guessPane(guessPane)
@@ -60,7 +64,9 @@ public class SinglePlayFrame extends BaseFrame {
         pack();
         ComponentUtils.setCenterWindowOnScreen(this);
 
-        playFrameHelper.setListeners();
+        playFrameHelper.setupListeners();
+        // 返回主菜单按钮
+        homeButton.addActionListener(e -> WindowManager.getInstance().showMenuFrame());
         // 设置面板
         setupLetterButtonGroupListener();
         settingsButton.addActionListener(e -> settingsPane.setVisible(!settingsPane.isVisible()));
@@ -69,10 +75,12 @@ public class SinglePlayFrame extends BaseFrame {
     /**
      * 开始游戏
      */
-    public void updateUI(User user) {
+    public void startGame(User user) {
         letterCount = 5;
         letterButtonGroup.setSelected(letter5RadioButton.getModel(), true);
-        playFrameHelper.updateGuessPane(letterCount, user, true, null);
+        playFrameHelper.updateGuessPane(letterCount);
+        singlePlayService.registerUser(user, true, null);
+        singlePlayService.requestStartGame(letterCount);
     }
 
     /**
@@ -89,10 +97,13 @@ public class SinglePlayFrame extends BaseFrame {
                     int newLetterCount = Integer.parseInt(button.getActionCommand());
                     log.info("字母数量已更改为: {}", newLetterCount);
 
-                    // 立即更新字母数量，并更新面板
+                    // 立即更新字母数量
                     letterCount = newLetterCount;
-                    playFrameHelper.updateGuessPane(newLetterCount, null, true, null);
                     keyboardPane.resetKeyboard();
+                    // 更新面板
+                    playFrameHelper.updateGuessPane(newLetterCount);
+                    // 更新游戏
+                    singlePlayService.requestStartGame(letterCount);
 
                     // 关闭设置面板
                     settingsPane.setVisible(false);

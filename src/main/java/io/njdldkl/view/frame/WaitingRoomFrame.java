@@ -1,13 +1,18 @@
 package io.njdldkl.view.frame;
 
+import com.google.common.eventbus.Subscribe;
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.User;
+import io.njdldkl.pojo.event.GameStartedEvent;
+import io.njdldkl.pojo.event.HostLeftEvent;
+import io.njdldkl.pojo.event.UserListUpdatedEvent;
 import io.njdldkl.service.impl.MultiPlayService;
 import io.njdldkl.util.ComponentUtils;
 import io.njdldkl.view.WindowManager;
 import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.component.RoundedRadioButton;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -39,13 +44,16 @@ public class WaitingRoomFrame extends BaseFrame {
     private RoundedButton startButton;
     private RoundedButton leaveRoomButton;
 
-    private MultiPlayService playService;
+    @Getter
+    private MultiPlayService multiPlayService;
 
     // 当前用户
+    @Getter
     private User currentUser;
     // 房间ID
     private int roomId;
     // 字母数量，只有房主的设置有效
+    @Getter
     private int letterCount;
 
     public WaitingRoomFrame() {
@@ -53,23 +61,19 @@ public class WaitingRoomFrame extends BaseFrame {
         pack();
         ComponentUtils.setCenterWindowOnScreen(this);
 
-        // 初始化用户面板
-        usersPane.setLayout(new FlowLayout(FlowLayout.LEFT,10,10));
+        multiPlayService = new MultiPlayService();
+        // 注册为事件监听器
+        multiPlayService.registerEventListener(this);
 
         setupLetterButtonGroupListener();
-        setupPlayService();
         settingsButton.addActionListener(e -> settingsPane.setVisible(!settingsPane.isVisible()));
-
-        // TODO
-        startButton.addActionListener(e -> {
-        });
-
+        startButton.addActionListener(e -> multiPlayService.requestStartGame(letterCount));
         leaveRoomButton.addActionListener(e -> leaveRoom());
     }
 
     public void updateUI(User user, boolean host, String roomId) {
         this.currentUser = user;
-        playService.registerUser(user, host, roomId);
+        multiPlayService.registerUser(user, host, roomId);
 
         if (!host) {
             // 如果不是房主，则隐藏设置按钮和开始按钮
@@ -90,31 +94,18 @@ public class WaitingRoomFrame extends BaseFrame {
     }
 
     /**
-     * 设置多人游戏服务
-     */
-    private void setupPlayService() {
-        // 如果之前有服务，先移除回调
-        if (playService != null) {
-            playService.removeUserListUpdateCallback(this::updateUsersList);
-            playService.removeHostLeftCallback(this::leaveRoom);
-        }
-
-        playService = new MultiPlayService();
-        // 注册用户列表更新的回调
-        playService.addUserListUpdateCallback(this::updateUsersList);
-        // 注册房主离开的回调
-        playService.addHostLeftCallback(this::leaveRoom);
-    }
-
-    /**
      * 更新用户列表UI
      */
-    private void updateUsersList(List<User> users) {
-        usersPane.removeAll();
-        users.forEach(this::addUserToRoom);
+    @Subscribe
+    public void onUserListUpdated(UserListUpdatedEvent event) {
+        SwingUtilities.invokeLater(() -> {
+            usersPane.removeAll();
+            List<User> users = event.users();
+            users.forEach(this::addUserToRoom);
 
-        usersPane.revalidate();
-        usersPane.repaint();
+            usersPane.revalidate();
+            usersPane.repaint();
+        });
     }
 
     private void addUserToRoom(User user) {
@@ -136,7 +127,7 @@ public class WaitingRoomFrame extends BaseFrame {
         userPanel.add(nameLabel, BorderLayout.SOUTH);
 
         // 设置背景色
-        if (playService != null && playService.isHost(user)) {
+        if (multiPlayService != null && multiPlayService.isHost(user)) {
             // 房主背景色为绿色
             userPanel.setBackground(ColorConstant.GREEN);
             nameLabel.setText(nameLabel.getText() + " [房主]");
@@ -144,7 +135,7 @@ public class WaitingRoomFrame extends BaseFrame {
 
         if (currentUser != null && user.getId().equals(currentUser.getId())) {
             // 当前用户背景色为黄色，但如果是房主则保持绿色
-            if (playService != null && !playService.isHost(user)) {
+            if (multiPlayService != null && !multiPlayService.isHost(user)) {
                 userPanel.setBackground(ColorConstant.YELLOW);
             }
             nameLabel.setText(nameLabel.getText() + " (你)");
@@ -156,11 +147,26 @@ public class WaitingRoomFrame extends BaseFrame {
         usersPane.add(userPanel);
     }
 
-    private void leaveRoom(){
-        if (playService != null) {
-            playService.leaveRoom(currentUser);
+    @Subscribe
+    public void onHostLeft(HostLeftEvent event) {
+        SwingUtilities.invokeLater(() -> {
+            WindowManager.getInstance().showMenuFrame();
+        });
+    }
+
+    private void leaveRoom() {
+        if (multiPlayService != null) {
+            multiPlayService.leaveRoom(currentUser);
             WindowManager.getInstance().showMenuFrame();
         }
+    }
+
+    @Subscribe
+    public void onGameStarted(GameStartedEvent event) {
+        SwingUtilities.invokeLater(() -> {
+            // 显示游戏界面
+            WindowManager.getInstance().showMultiPlayFrame();
+        });
     }
 
     /**

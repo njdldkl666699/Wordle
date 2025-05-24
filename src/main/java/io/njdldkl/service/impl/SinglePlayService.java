@@ -38,11 +38,11 @@ public class SinglePlayService implements PlayService {
      * 单人游戏下，直接重置游戏状态
      */
     @Override
-    public void startGame(int wordLength) {
+    public void requestStartGame(int letterCount) {
         // 单人模式，user参数暂时不使用
-        answer = WordUtils.getRandomWord(wordLength);
+        answer = WordUtils.getRandomWord(letterCount);
         currentGuessCount = 0;
-        maxGuessCount = wordLength + 1;
+        maxGuessCount = letterCount + 1;
     }
 
     /**

@@ -22,9 +22,10 @@ public interface PlayService {
     void registerUser(User user, boolean host, String roomId);
 
     /**
-     * 开启新的一局游戏
+     * 开启一局新的游戏
+     * @param letterCount 字母数量
      */
-    void startGame(int wordLength);
+    void requestStartGame(int letterCount);
 
     /**
      * 检查单词是否有效

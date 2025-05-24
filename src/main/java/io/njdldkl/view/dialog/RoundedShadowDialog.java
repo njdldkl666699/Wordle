@@ -2,6 +2,7 @@ package io.njdldkl.view.dialog;
 
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.IntegerConstant;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;

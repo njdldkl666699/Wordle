@@ -34,7 +34,6 @@ public class PlayFrameHelper {
 
     private final JFrame frame;
 
-    private final RoundedButton homeButton;
     private final RoundedButton giveUpButton;
 
     private final JScrollPane guessScrollPane;
@@ -80,10 +79,7 @@ public class PlayFrameHelper {
     /**
      * 设置监听器
      */
-    public void setListeners() {
-        // 返回主菜单按钮
-        homeButton.addActionListener(e -> WindowManager.getInstance().showMenuFrame());
-
+    public void setupListeners() {
         // 认输按钮
         giveUpButton.addActionListener(e -> WindowManager.getInstance()
                 .showGameOverDialog("游戏失败！", playService.getAnswer(), frame));
@@ -146,13 +142,9 @@ public class PlayFrameHelper {
     /**
      * 根据字母数量更新猜单词面板
      */
-    public void updateGuessPane(int letterCount, User user, boolean host,String roomId) {
+    public void updateGuessPane(int letterCount) {
         // 重置游戏状态
         resetFields(letterCount);
-        if (user != null) {
-            playService.registerUser(user,host , roomId);
-        }
-        playService.startGame(letterCount);
 
         // 清空面板
         guessPane.removeAll();

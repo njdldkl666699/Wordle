@@ -6,9 +6,11 @@ import io.njdldkl.pojo.BaseMessage;
 import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.request.JoinRoomRequest;
 import io.njdldkl.pojo.request.LeaveRoomRequest;
+import io.njdldkl.pojo.request.StartGameRequest;
 import io.njdldkl.pojo.response.HostLeftResponse;
 import io.njdldkl.pojo.response.JoinRoomResponse;
 import io.njdldkl.pojo.response.LeaveRoomResponse;
+import io.njdldkl.pojo.response.StartGameResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -29,12 +31,6 @@ public class Server {
 
     // 连接的客户端所对应的TcpJsonHelper
     private final List<TcpJsonHelper> clientConnections = new ArrayList<>();
-
-    // 房主用户
-    private final User hostUser;
-
-    // 房间内的用户列表
-    private final Map<UUID, User> users = new ConcurrentHashMap<>();
 
     public Server(User hostUser) {
         this.hostUser = hostUser;
@@ -92,6 +88,60 @@ public class Server {
         clientConnections.clear();
     }
 
+    private class ServerMessageHandler implements TcpJsonHelper.MessageHandler {
+        @Override
+        public void receiveMessage(JSONObject jsonObject, String type) {
+            try {
+                switch (type) {
+                    case "JoinRoomRequest" -> joinRoom(jsonObject.toJavaObject(JoinRoomRequest.class));
+                    case "LeaveRoomRequest" -> leaveRoom(jsonObject.toJavaObject(LeaveRoomRequest.class));
+                    case "StartGameRequest" -> startGame(jsonObject.toJavaObject(StartGameRequest.class));
+                    default -> log.warn("未知消息类型: {}", type);
+                }
+            } catch (IOException e) {
+                log.error("处理消息时发生异常: ", e);
+            }
+        }
+
+        @Override
+        public void onError(Exception e) {
+            if (e instanceof SocketException) {
+                log.info("客户端连接已关闭: {}", e.getMessage());
+            } else {
+                log.error("发生异常: ", e);
+            }
+        }
+    }
+
+    // 房主用户
+    private final User hostUser;
+
+    // 房间内的用户列表
+    private final Map<UUID, User> users = new ConcurrentHashMap<>();
+
+    /**
+     * 广播消息给所有连接的客户端
+     */
+    private void broadcastToAllClients(BaseMessage message) {
+        List<TcpJsonHelper> invalidConnections = new ArrayList<>();
+
+        for (TcpJsonHelper tcpHelper : clientConnections) {
+            try {
+                tcpHelper.sendMessage(message);
+            } catch (IOException e) {
+                // 记录无效连接，稍后移除
+                log.info("向客户端发送消息失败，连接可能已关闭: {}", e.getMessage());
+                invalidConnections.add(tcpHelper);
+            }
+        }
+
+        // 移除无效连接
+        if (!invalidConnections.isEmpty()) {
+            clientConnections.removeAll(invalidConnections);
+            log.info("已移除 {} 个无效连接", invalidConnections.size());
+        }
+    }
+
     /**
      * 加入房间
      */
@@ -140,49 +190,16 @@ public class Server {
     }
 
     /**
-     * 广播消息给所有连接的客户端
+     * 开始游戏
      */
-    private void broadcastToAllClients(BaseMessage message) {
-        List<TcpJsonHelper> invalidConnections = new ArrayList<>();
-
-        for (TcpJsonHelper tcpHelper : clientConnections) {
-            try {
-                tcpHelper.sendMessage(message);
-            } catch (IOException e) {
-                // 记录无效连接，稍后移除
-                log.info("向客户端发送消息失败，连接可能已关闭: {}", e.getMessage());
-                invalidConnections.add(tcpHelper);
-            }
+    private void startGame(StartGameRequest request) {
+        log.info("房主{}开始游戏，字母数量：{}", request.getUserId(), request.getLetterCount());
+        // 检查房主是否是当前用户
+        if (!request.getUserId().equals(hostUser.getId())) {
+            log.warn("只有房主可以开始游戏");
+            return;
         }
-
-        // 移除无效连接
-        if (!invalidConnections.isEmpty()) {
-            clientConnections.removeAll(invalidConnections);
-            log.info("已移除 {} 个无效连接", invalidConnections.size());
-        }
-    }
-
-    private class ServerMessageHandler implements TcpJsonHelper.MessageHandler {
-        @Override
-        public void receiveMessage(JSONObject jsonObject, String type) {
-            try {
-                switch (type) {
-                    case "JoinRoomRequest" -> joinRoom(jsonObject.toJavaObject(JoinRoomRequest.class));
-                    case "LeaveRoomRequest" -> leaveRoom(jsonObject.toJavaObject(LeaveRoomRequest.class));
-                    default -> log.warn("未知消息类型: {}", type);
-                }
-            } catch (IOException e) {
-                log.error("处理消息时发生异常: ", e);
-            }
-        }
-
-        @Override
-        public void onError(Exception e) {
-            if(e instanceof SocketException){
-                log.info("客户端连接已关闭: {}", e.getMessage());
-            } else {
-                log.error("发生异常: ", e);
-            }
-        }
+        // 广播给所有连接的客户端
+        broadcastToAllClients(new StartGameResponse(request.getLetterCount()));
     }
 }

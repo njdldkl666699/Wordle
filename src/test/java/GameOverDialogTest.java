@@ -1,8 +1,6 @@
 import io.njdldkl.pojo.Word;
 import io.njdldkl.view.dialog.GameOverDialog;
 
-import javax.swing.*;
-
 public class GameOverDialogTest {
 
     public static void main(String[] args) {

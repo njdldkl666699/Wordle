@@ -3,14 +3,19 @@ package io.njdldkl.view.frame;
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.User;
 import io.njdldkl.util.ComponentUtils;
+import io.njdldkl.util.IpRoomIdUtils;
 import io.njdldkl.view.WindowManager;
 import io.njdldkl.view.component.RoundedButton;
+import io.njdldkl.view.dialog.AutoCloseDialog;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -77,7 +82,7 @@ public class MenuFrame extends BaseFrame {
         createRoomButton.addActionListener(e -> WindowManager.getInstance().showCreateRoomFrame());
 
         // 加入房间按钮
-        joinRoomButton.addActionListener(e -> WindowManager.getInstance().showJoinRoomFrame());
+        joinRoomButton.addActionListener(e -> handleJoinRoomButtonPress());
     }
 
     public User getUser() {
@@ -143,6 +148,92 @@ public class MenuFrame extends BaseFrame {
             Image scaledInstance = avatar.getImage().getScaledInstance(48, 48, Image.SCALE_SMOOTH);
             ImageIcon imageIcon = new ImageIcon(scaledInstance);
             avatarButton.setIcon(imageIcon);
+        }
+    }
+
+    /**
+     * <p>点击加入房间按钮时的处理</p>
+     * 进行连接测试<br>
+     * 如果连接成功，跳转到等待房间界面<br>
+     * 如果连接失败，弹出提示框<br>
+     */
+    private void handleJoinRoomButtonPress() {
+        String roomId = joinRoomTextField.getText().trim();
+
+        // 显示连接中提示
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        joinRoomButton.setEnabled(false);
+        joinRoomButton.setText("连接中...");
+
+        // 使用SwingWorker在后台线程执行连接测试
+        SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Boolean doInBackground() {
+                return canConnectToRoom(roomId);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    boolean canConnect = get();
+                    if (canConnect) {
+                        // 连接成功，跳转到等待房间
+                        WindowManager.getInstance().showJoinRoomFrame();
+                    } else {
+                        // 连接失败
+                        log.warn("连接失败");
+                        connectFailedDialog.setVisible(true);
+                    }
+                } catch (Exception ex) {
+                    log.error("连接验证异常", ex);
+                    connectFailedDialog.setVisible(true);
+                } finally {
+                    // 恢复界面状态
+                    setCursor(Cursor.getDefaultCursor());
+                    joinRoomButton.setEnabled(true);
+                    joinRoomButton.setText("加入房间");
+                }
+            }
+
+            private final AutoCloseDialog connectFailedDialog;
+            // 实例初始化块，会在创建对象时执行
+            {
+                connectFailedDialog = new AutoCloseDialog(MenuFrame.this);
+                connectFailedDialog.setText("连接失败");
+            }
+        };
+
+        worker.execute();
+    }
+
+    /**
+     * 连接测试
+     */
+    private boolean canConnectToRoom(String roomId) {
+        if (roomId == null || roomId.trim().isEmpty()) {
+            log.warn("房间ID不能为空");
+            return false;
+        }
+
+        String host = IpRoomIdUtils.roomIdToIp(roomId);
+        Socket socket = null;
+
+        try {
+            // 尝试连接，设置超时时间为2秒
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(host, IntegerConstant.PORT), 2000);
+            return true;
+        } catch (IOException e) {
+            log.warn("连接房间失败: {}", e.getMessage());
+            return false;
+        } finally {
+            if (socket != null && !socket.isClosed()) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    log.error("关闭测试连接失败", e);
+                }
+            }
         }
     }
 
