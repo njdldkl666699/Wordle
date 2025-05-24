@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.BaseMessage;
 import io.njdldkl.pojo.User;
+import io.njdldkl.pojo.Word;
 import io.njdldkl.pojo.request.JoinRoomRequest;
 import io.njdldkl.pojo.request.LeaveRoomRequest;
 import io.njdldkl.pojo.request.StartGameRequest;
@@ -119,6 +120,14 @@ public class Server {
     // 房间内的用户列表
     private final Map<UUID, User> users = new ConcurrentHashMap<>();
 
+    // 正确单词
+    private Word answer;
+
+    // 游戏开始时间
+    private long startTime;
+    // 游戏结束时间
+    private long endTime;
+
     /**
      * 广播消息给所有连接的客户端
      */
@@ -201,5 +210,7 @@ public class Server {
         }
         // 广播给所有连接的客户端
         broadcastToAllClients(new StartGameResponse(request.getLetterCount()));
+        // 记录游戏开始时间
+        startTime = System.currentTimeMillis();
     }
 }

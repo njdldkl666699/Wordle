@@ -3,10 +3,13 @@ package io.njdldkl.net;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.common.eventbus.EventBus;
 import io.njdldkl.constant.IntegerConstant;
+import io.njdldkl.pojo.response.GetAnswerResponse;
 import io.njdldkl.pojo.User;
+import io.njdldkl.pojo.Word;
 import io.njdldkl.pojo.event.GameStartedEvent;
 import io.njdldkl.pojo.event.HostLeftEvent;
 import io.njdldkl.pojo.event.UserListUpdatedEvent;
+import io.njdldkl.pojo.request.GetAnswerRequest;
 import io.njdldkl.pojo.request.JoinRoomRequest;
 import io.njdldkl.pojo.request.LeaveRoomRequest;
 import io.njdldkl.pojo.request.StartGameRequest;
@@ -19,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class Client {
@@ -87,6 +92,21 @@ public class Client {
         tcpHelper.sendMessage(new StartGameRequest(userId, letterCount));
     }
 
+    // 答案的Future对象
+    private CompletableFuture<Word> answerFuture;
+
+    /**
+     * <p>获取答案</p>
+     * 以同步方式获取答案，获取过程中会阻塞当前线程
+     */
+    public Word getAnswer() throws IOException, ExecutionException, InterruptedException {
+        log.info("获取答案");
+        answerFuture = new CompletableFuture<>();
+        tcpHelper.sendMessage(new GetAnswerRequest());
+        // 阻塞等待结果，转换为同步调用
+        return answerFuture.get();
+    }
+
     /**
      * 关闭连接
      */
@@ -118,6 +138,7 @@ public class Client {
                 case "LeaveRoomResponse" -> onLeaveRoomResponse(jsonObject.toJavaObject(LeaveRoomResponse.class));
                 case "HostLeftResponse" -> onHostLeft();
                 case "StartGameResponse" -> onStartGame(jsonObject.toJavaObject(StartGameResponse.class));
+                case "GetAnswerResponse" -> onGetAnswerResponse(jsonObject.toJavaObject(GetAnswerResponse.class));
             }
         }
 
@@ -158,5 +179,15 @@ public class Client {
 
         // 直接发布事件到EventBus
         eventBus.post(new GameStartedEvent(response.getLetterCount()));
+    }
+
+    private void onGetAnswerResponse(GetAnswerResponse response) {
+        log.info("获取答案成功: {}", response);
+        if (answerFuture != null) {
+            // 将答案设置为完成状态
+            answerFuture.complete(response.getAnswer());
+            // 清空Future对象
+            answerFuture = null;
+        }
     }
 }

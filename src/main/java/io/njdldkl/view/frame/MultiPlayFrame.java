@@ -2,12 +2,14 @@ package io.njdldkl.view.frame;
 
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.User;
+import io.njdldkl.pojo.Word;
 import io.njdldkl.service.impl.MultiPlayService;
 import io.njdldkl.util.ComponentUtils;
 import io.njdldkl.view.WindowManager;
 import io.njdldkl.view.component.KeyboardPanel;
 import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.dialog.BackHomeDialog;
+import io.njdldkl.view.dialog.GameOverDialog;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -38,7 +40,6 @@ public class MultiPlayFrame extends BaseFrame {
 
         playFrameHelper = PlayFrameHelper.builder()
                 .frame(this)
-                .giveUpButton(giveUpButton)
                 .guessScrollPane(guessScrollPane)
                 .guessPane(guessPane)
                 .keyboardPane(keyboardPane)
@@ -51,7 +52,10 @@ public class MultiPlayFrame extends BaseFrame {
         backHomeDialog = createBackHomeDialog();
 
         playFrameHelper.setupListeners();
+        // 返回主菜单按钮
         homeButton.addActionListener(e -> backHomeDialog.setVisible(true));
+        // 认输按钮
+        giveUpButton.addActionListener(e -> handleGiveUpButtonPressed());
     }
 
     /**
@@ -64,6 +68,30 @@ public class MultiPlayFrame extends BaseFrame {
         this.currentUser = currentUser;
         // 更新面板
         playFrameHelper.updateGuessPane(letterCount);
+    }
+
+    private void handleGiveUpButtonPressed() {
+        // 先获取答案
+        Word answer = multiPlayService.getAnswer();
+
+        // 创建游戏结束对话框
+        GameOverDialog gameOverDialog = new GameOverDialog(this);
+        gameOverDialog.setTitle("游戏失败！");
+        gameOverDialog.setWord(answer);
+
+        // 为返回主菜单按钮添加监听器
+        gameOverDialog.addBackHomeButtonListener(event -> {
+            // 处理网络断开
+            multiPlayService.leaveRoom(currentUser);
+            // 关闭对话框和游戏界面
+            gameOverDialog.setVisible(false);
+            setVisible(false);
+            // 显示主菜单
+            WindowManager.getInstance().showMenuFrame();
+        });
+
+        // 显示游戏结束对话框
+        gameOverDialog.setVisible(true);
     }
 
     private BackHomeDialog createBackHomeDialog() {

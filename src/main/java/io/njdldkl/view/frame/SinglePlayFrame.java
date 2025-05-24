@@ -3,6 +3,7 @@ package io.njdldkl.view.frame;
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.pojo.User;
+import io.njdldkl.pojo.Word;
 import io.njdldkl.service.PlayService;
 import io.njdldkl.service.impl.SinglePlayService;
 import io.njdldkl.util.ComponentUtils;
@@ -10,6 +11,7 @@ import io.njdldkl.view.WindowManager;
 import io.njdldkl.view.component.KeyboardPanel;
 import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.component.RoundedRadioButton;
+import io.njdldkl.view.dialog.GameOverDialog;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -17,7 +19,7 @@ import java.awt.*;
 import java.util.Enumeration;
 
 @Slf4j
-public class SinglePlayFrame extends BaseFrame {
+public class SinglePlayFrame extends BaseFrame implements GameOverDialogHandler {
 
     private JPanel contentPane;
     private final PlayFrameHelper playFrameHelper;
@@ -53,8 +55,8 @@ public class SinglePlayFrame extends BaseFrame {
 
         playFrameHelper = PlayFrameHelper.builder()
                 .frame(this)
+                .gameOverDialogHandler(this)
                 .playService(singlePlayService)
-                .giveUpButton(giveUpButton)
                 .guessScrollPane(guessScrollPane)
                 .guessPane(guessPane)
                 .keyboardPane(keyboardPane)
@@ -67,6 +69,8 @@ public class SinglePlayFrame extends BaseFrame {
         playFrameHelper.setupListeners();
         // 返回主菜单按钮
         homeButton.addActionListener(e -> WindowManager.getInstance().showMenuFrame());
+        // 认输按钮
+        giveUpButton.addActionListener(e -> handleGiveUpButtonPressed());
         // 设置面板
         setupLetterButtonGroupListener();
         settingsButton.addActionListener(e -> settingsPane.setVisible(!settingsPane.isVisible()));
@@ -81,6 +85,21 @@ public class SinglePlayFrame extends BaseFrame {
         playFrameHelper.updateGuessPane(letterCount);
         singlePlayService.registerUser(user, true, null);
         singlePlayService.requestStartGame(letterCount);
+    }
+
+    private void handleGiveUpButtonPressed(){
+        // 创建游戏结束对话框
+        GameOverDialog gameOverDialog = new GameOverDialog(this);
+        gameOverDialog.setTitle("游戏失败！");
+        gameOverDialog.setWord(singlePlayService.getAnswer());
+
+        gameOverDialog.addBackHomeButtonListener(e -> {
+            gameOverDialog.setVisible(false);
+            setVisible(false);
+            WindowManager.getInstance().showMenuFrame();
+        });
+
+        gameOverDialog.setVisible(true);
     }
 
     /**
@@ -130,5 +149,35 @@ public class SinglePlayFrame extends BaseFrame {
         letter9RadioButton = new RoundedRadioButton(IntegerConstant.SHARP_RADIUS, ColorConstant.RADIO_NORMAL, ColorConstant.GREEN);
         letter10RadioButton = new RoundedRadioButton(IntegerConstant.SHARP_RADIUS, ColorConstant.RADIO_NORMAL, ColorConstant.GREEN);
         letter11RadioButton = new RoundedRadioButton(IntegerConstant.SHARP_RADIUS, ColorConstant.RADIO_NORMAL, ColorConstant.GREEN);
+    }
+
+    @Override
+    public void showWinGameOverDialog(Word answer) {
+        log.info("创建游戏结束胜利对话框");
+        GameOverDialog gameOverDialog = new GameOverDialog(this);
+        gameOverDialog.addBackHomeButtonListener(e -> {
+            gameOverDialog.setVisible(false);
+            setVisible(false);
+            WindowManager.getInstance().showMenuFrame();
+        });
+
+        gameOverDialog.setTitle("游戏成功！");
+        gameOverDialog.setWord(answer);
+        gameOverDialog.setVisible(true);
+    }
+
+    @Override
+    public void showLoseGameOverDialog(Word answer) {
+        log.info("创建游戏结束失败对话框");
+        GameOverDialog gameOverDialog = new GameOverDialog(this);
+        gameOverDialog.addBackHomeButtonListener(e -> {
+            gameOverDialog.setVisible(false);
+            setVisible(false);
+            WindowManager.getInstance().showMenuFrame();
+        });
+
+        gameOverDialog.setTitle("游戏失败！");
+        gameOverDialog.setWord(answer);
+        gameOverDialog.setVisible(true);
     }
 }

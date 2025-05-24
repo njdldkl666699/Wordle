@@ -33,7 +33,6 @@ public class WindowManager {
     private EasterEggDialog easterEggDialog;
     private HelpDialog helpDialog;
     private GameOverDialog gameOverDialog;
-    private BackHomeDialog backHomeDialog;
 
     private WindowManager() {
     }
@@ -166,22 +165,5 @@ public class WindowManager {
             helpDialog = new HelpDialog(menuFrame);
         }
         helpDialog.setVisible(true);
-    }
-
-    public void showGameOverDialog(String title, Word word, JFrame parent) {
-        if (gameOverDialog == null) {
-            log.info("创建游戏结束对话框");
-            gameOverDialog = new GameOverDialog(singlePlayFrame);
-            gameOverDialog.addBackHomeButtonListener(e -> {
-                // 单人模式下，返回主菜单即可
-                // 多人模式下，返回主菜单，断开连接
-                gameOverDialog.setVisible(false);
-                parent.setVisible(false);
-                menuFrame.setVisible(true);
-            });
-        }
-        gameOverDialog.setTitle(title);
-        gameOverDialog.setWord(word);
-        gameOverDialog.setVisible(true);
     }
 }

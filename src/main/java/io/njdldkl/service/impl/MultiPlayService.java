@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class MultiPlayService implements PlayService {
@@ -173,7 +174,15 @@ public class MultiPlayService implements PlayService {
 
     @Override
     public Word getAnswer() {
-        return null;
+        if(client == null|| !client.isConnected()){
+            throw new IllegalStateException("客户端未连接或已关闭");
+        }
+
+        try {
+            return client.getAnswer();
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

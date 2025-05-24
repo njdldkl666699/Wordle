@@ -5,12 +5,9 @@ import io.njdldkl.constant.DimensionConstant;
 import io.njdldkl.constant.IntegerConstant;
 import io.njdldkl.enumerable.WordStatus;
 import io.njdldkl.pojo.Pair;
-import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
 import io.njdldkl.service.PlayService;
-import io.njdldkl.view.WindowManager;
 import io.njdldkl.view.component.KeyboardPanel;
-import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.component.RoundedLetterPanel;
 import io.njdldkl.view.dialog.AutoCloseDialog;
 import lombok.Builder;
@@ -33,8 +30,7 @@ public class PlayFrameHelper {
     private static final Font LETTER_FONT = new Font("Arial", Font.BOLD, 36);
 
     private final JFrame frame;
-
-    private final RoundedButton giveUpButton;
+    private final GameOverDialogHandler gameOverDialogHandler;
 
     private final JScrollPane guessScrollPane;
     private final JPanel guessPane;
@@ -80,10 +76,6 @@ public class PlayFrameHelper {
      * 设置监听器
      */
     public void setupListeners() {
-        // 认输按钮
-        giveUpButton.addActionListener(e -> WindowManager.getInstance()
-                .showGameOverDialog("游戏失败！", playService.getAnswer(), frame));
-
         // 初始化键盘
         keyboardPane.setKeyListener(e -> {
             JButton button = (JButton) e.getSource();
@@ -245,21 +237,22 @@ public class PlayFrameHelper {
         // 如果全部正确，弹出对话框
         if (correct) {
             log.info("猜测正确，游戏胜利");
-            WindowManager.getInstance()
-                    .showGameOverDialog("游戏胜利！", playService.getAnswer(), frame);
+            // TODO 多人模式和单人模式的胜利提示框不同
+            // 多人模式需要显示获胜玩家，游戏时间
+            // 多人模式下，一个玩家胜利，其他玩家自动弹出失败提示框
+            gameOverDialogHandler.showWinGameOverDialog(playService.getAnswer());
             return;
         }
 
         // 更新当前行列索引
         currentRow++;
         // 判断是否失败
-        // 单人模式下，失败条件为猜测次数超过最大次数，正常情况下不起作用
-        // 多人模式下，最先猜测正确的玩家获胜，其余玩家失败
+        // 单人模式下，失败条件为猜测次数超过最大次数
+        // 多人模式下，失败条件为猜测次数超过最大次数，或 最先猜测正确的玩家获胜，其余玩家失败
         if (playService.isFailed()) {
             Word answer = playService.getAnswer();
             log.info("游戏失败，正确单词为: {}", answer.getWord());
-            WindowManager.getInstance()
-                    .showGameOverDialog("游戏失败！", answer, frame);
+            gameOverDialogHandler.showLoseGameOverDialog(answer);
             return;
         }
         currentCol = 0;
