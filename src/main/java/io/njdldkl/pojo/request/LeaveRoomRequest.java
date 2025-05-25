@@ -1,15 +1,13 @@
 package io.njdldkl.pojo.request;
 
-import io.njdldkl.pojo.BaseMessage;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
-public class LeaveRoomRequest extends BaseMessage {
+public class LeaveRoomRequest extends BaseRequest {
 
-    // 用户id
-    private UUID userId;
+    public LeaveRoomRequest(UUID userId) {
+        setUserId(userId);
+    }
 }

@@ -115,7 +115,7 @@ public class WordUtils {
             }
         }
 
-        log.info("猜测单词: {}, 答案: {}, 状态: {}", guessWord, answer, statusList);
+        log.debug("猜测单词: {}, 答案: {}, 状态: {}", guessWord, answer, statusList);
         return statusList;
     }
 }

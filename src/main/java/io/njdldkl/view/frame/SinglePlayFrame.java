@@ -97,6 +97,7 @@ public class SinglePlayFrame extends BaseFrame implements GameOverDialogHandler 
             gameOverDialog.setVisible(false);
             setVisible(false);
             WindowManager.getInstance().showMenuFrame();
+            gameOverDialog.dispose();
         });
 
         gameOverDialog.setVisible(true);
@@ -159,6 +160,7 @@ public class SinglePlayFrame extends BaseFrame implements GameOverDialogHandler 
             gameOverDialog.setVisible(false);
             setVisible(false);
             WindowManager.getInstance().showMenuFrame();
+            gameOverDialog.dispose();
         });
 
         gameOverDialog.setTitle("游戏成功！");
@@ -174,6 +176,7 @@ public class SinglePlayFrame extends BaseFrame implements GameOverDialogHandler 
             gameOverDialog.setVisible(false);
             setVisible(false);
             WindowManager.getInstance().showMenuFrame();
+            gameOverDialog.dispose();
         });
 
         gameOverDialog.setTitle("游戏失败！");

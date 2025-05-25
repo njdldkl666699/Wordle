@@ -11,6 +11,7 @@ import io.njdldkl.view.component.KeyboardPanel;
 import io.njdldkl.view.component.RoundedLetterPanel;
 import io.njdldkl.view.dialog.AutoCloseDialog;
 import lombok.Builder;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -36,6 +37,7 @@ public class PlayFrameHelper {
     private final JPanel guessPane;
     private final KeyboardPanel keyboardPane;
 
+    @Setter
     private PlayService playService;
 
     // 总行数
@@ -237,9 +239,6 @@ public class PlayFrameHelper {
         // 如果全部正确，弹出对话框
         if (correct) {
             log.info("猜测正确，游戏胜利");
-            // TODO 多人模式和单人模式的胜利提示框不同
-            // 多人模式需要显示获胜玩家，游戏时间
-            // 多人模式下，一个玩家胜利，其他玩家自动弹出失败提示框
             gameOverDialogHandler.showWinGameOverDialog(playService.getAnswer());
             return;
         }
@@ -248,7 +247,8 @@ public class PlayFrameHelper {
         currentRow++;
         // 判断是否失败
         // 单人模式下，失败条件为猜测次数超过最大次数
-        // 多人模式下，失败条件为猜测次数超过最大次数，或 最先猜测正确的玩家获胜，其余玩家失败
+        // 多人模式下，失败条件为猜测次数超过最大次数
+        // 或 最先猜测正确的玩家获胜，其余玩家失败，这种情况是通过事件驱动的
         if (playService.isFailed()) {
             Word answer = playService.getAnswer();
             log.info("游戏失败，正确单词为: {}", answer.getWord());
@@ -279,7 +279,6 @@ public class PlayFrameHelper {
         JPanel letterRow = (JPanel) guessPane.getComponent(currentRow);
         for (int i = 0; i < totalCol; i++) {
             RoundedLetterPanel letterPanel = (RoundedLetterPanel) letterRow.getComponent(i);
-            String letter = pairList.get(i).getFirst();
             WordStatus wordStatus = pairList.get(i).getSecond();
 
             // 设置无边框

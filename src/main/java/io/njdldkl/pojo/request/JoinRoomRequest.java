@@ -1,12 +1,17 @@
 package io.njdldkl.pojo.request;
 
-import io.njdldkl.pojo.BaseMessage;
 import io.njdldkl.pojo.User;
-import lombok.*;
+import lombok.Data;
+import lombok.Getter;
 
 @Data
-@AllArgsConstructor
-public class JoinRoomRequest extends BaseMessage {
+public class JoinRoomRequest extends BaseRequest {
+
+    public JoinRoomRequest(User user, String roomId) {
+        this.user = user;
+        this.roomId = roomId;
+        setUserId(user.getId());
+    }
 
     // 用户
     private User user;

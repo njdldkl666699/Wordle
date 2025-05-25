@@ -43,6 +43,7 @@ public class WaitingRoomFrame extends BaseFrame {
     private JPanel usersPane;
     private RoundedButton startButton;
     private RoundedButton leaveRoomButton;
+    private JLabel waitingLabel;
 
     @Getter
     private MultiPlayService multiPlayService;
@@ -50,8 +51,6 @@ public class WaitingRoomFrame extends BaseFrame {
     // 当前用户
     @Getter
     private User currentUser;
-    // 房间ID
-    private int roomId;
     // 字母数量，只有房主的设置有效
     @Getter
     private int letterCount;
@@ -127,7 +126,7 @@ public class WaitingRoomFrame extends BaseFrame {
         userPanel.add(nameLabel, BorderLayout.SOUTH);
 
         // 设置背景色
-        if (multiPlayService != null && multiPlayService.isHost(user)) {
+        if (multiPlayService != null && multiPlayService.isHost(user.getId())) {
             // 房主背景色为绿色
             userPanel.setBackground(ColorConstant.GREEN);
             nameLabel.setText(nameLabel.getText() + " [房主]");
@@ -135,7 +134,7 @@ public class WaitingRoomFrame extends BaseFrame {
 
         if (currentUser != null && user.getId().equals(currentUser.getId())) {
             // 当前用户背景色为黄色，但如果是房主则保持绿色
-            if (multiPlayService != null && !multiPlayService.isHost(user)) {
+            if (multiPlayService != null && !multiPlayService.isHost(user.getId())) {
                 userPanel.setBackground(ColorConstant.YELLOW);
             }
             nameLabel.setText(nameLabel.getText() + " (你)");
@@ -149,24 +148,20 @@ public class WaitingRoomFrame extends BaseFrame {
 
     @Subscribe
     public void onHostLeft(HostLeftEvent event) {
-        SwingUtilities.invokeLater(() -> {
-            WindowManager.getInstance().showMenuFrame();
-        });
+        SwingUtilities.invokeLater(() -> WindowManager.getInstance().showMenuFrame());
     }
 
     private void leaveRoom() {
         if (multiPlayService != null) {
-            multiPlayService.leaveRoom(currentUser);
+            multiPlayService.leaveRoom();
             WindowManager.getInstance().showMenuFrame();
         }
     }
 
     @Subscribe
     public void onGameStarted(GameStartedEvent event) {
-        SwingUtilities.invokeLater(() -> {
-            // 显示游戏界面
-            WindowManager.getInstance().showMultiPlayFrame();
-        });
+        // 显示游戏界面
+        SwingUtilities.invokeLater(() -> WindowManager.getInstance().showMultiPlayFrame());
     }
 
     /**

@@ -6,6 +6,7 @@ import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 游戏服务接口，处理游戏判断逻辑和数据存储传输

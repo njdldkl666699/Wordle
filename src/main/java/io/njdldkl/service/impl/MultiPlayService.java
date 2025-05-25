@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -26,7 +27,16 @@ public class MultiPlayService implements PlayService {
     private final EventBus eventBus = new EventBus();
     private Client client;
     private Server server;
-    private User hostUser;
+
+    // 当前用户
+    private User currentUser;
+
+    // 房主的用户ID
+    private UUID hostId;
+
+    public boolean isHost(UUID userId) {
+        return hostId != null && hostId.equals(userId);
+    }
 
     // 当前房间的用户列表
     private final List<User> users = new CopyOnWriteArrayList<>();
@@ -40,24 +50,18 @@ public class MultiPlayService implements PlayService {
         eventBus.unregister(listener);
     }
 
-    /**
-     * 获取当前房间是否是房主
-     */
-    public boolean isHost(User user) {
-        return hostUser != null && hostUser.getId().equals(user.getId());
-    }
-
     @Override
     public void registerUser(User user, boolean host, String roomId) {
         try {
+            currentUser = user;
             // 如果为房主，创建房间，创建服务器
             if (host) {
-                hostUser = user;
                 server = new Server(user);
             }
 
             // 创建客户端，连接并等待加入房间响应
             client = new Client(user, roomId, eventBus);
+            currentUser = user;
 
             // 服务自身订阅事件，以维护内部状态
             eventBus.register(this);
@@ -73,13 +77,13 @@ public class MultiPlayService implements PlayService {
     /**
      * 离开房间
      */
-    public void leaveRoom(User user) {
+    public void leaveRoom() {
         // 从用户列表中移除当前用户
-        users.remove(user);
+        users.remove(currentUser);
 
         // 通知服务器当前用户离开房间
         try {
-            client.leaveRoom(user.getId());
+            client.leaveRoom(currentUser.getId());
             // 关闭连接
             client.close();
             client = null;
@@ -101,8 +105,9 @@ public class MultiPlayService implements PlayService {
         this.users.clear();
         this.users.addAll(event.users());
 
-        if (event.hostUser() != null) {
-            this.hostUser = event.hostUser();
+        User hostUser = event.hostUser();
+        if (hostUser != null) {
+            this.hostId = hostUser.getId();
         }
 
         log.info("服务内部状态已更新: 用户数={}", users.size());
@@ -135,7 +140,7 @@ public class MultiPlayService implements PlayService {
         }
 
         // 清空状态
-        hostUser = null;
+        currentUser = null;
         users.clear();
 
         // 取消事件订阅
@@ -150,36 +155,70 @@ public class MultiPlayService implements PlayService {
         log.info("房主离开处理完成");
     }
 
+    // 当前猜测次数
+    private int currentGuessCount;
+
+    // 最大猜测次数
+    private int maxGuessCount;
+
     /**
      * 房主开始游戏，向服务器发生请求后，异步回调打开游戏界面
      */
     @Override
     public void requestStartGame(int letterCount) {
+        if (!isHost(currentUser.getId())) {
+            return;
+        }
+
         try {
-            client.startGame(hostUser.getId(), letterCount);
+            client.startGame(currentUser.getId(), letterCount);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    @Subscribe
+    public void onGameStarted(GameStartedEvent event) {
+        currentGuessCount = 0;
+        maxGuessCount = event.letterCount() + 1;
+    }
+
     @Override
     public boolean isValidWord(String word) {
-        return false;
-    }
-
-    @Override
-    public Pair<Boolean, List<WordStatus>> checkWord(String guessWord) {
-        return null;
-    }
-
-    @Override
-    public Word getAnswer() {
-        if(client == null|| !client.isConnected()){
+        if (client == null || !client.isConnected()) {
             throw new IllegalStateException("客户端未连接或已关闭");
         }
 
         try {
-            return client.getAnswer();
+            return client.isValidWord(currentUser.getId(), word);
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Pair<Boolean, List<WordStatus>> checkWord(String guessWord) {
+        if (client == null || !client.isConnected()) {
+            throw new IllegalStateException("客户端未连接或已关闭");
+        }
+
+        try {
+            var pairResult = client.checkWord(currentUser.getId(), guessWord);
+            currentGuessCount++;
+            return pairResult;
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Word getAnswer() {
+        if (client == null || !client.isConnected()) {
+            throw new IllegalStateException("客户端未连接或已关闭");
+        }
+
+        try {
+            return client.getAnswer(currentUser.getId());
         } catch (IOException | InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -187,7 +226,7 @@ public class MultiPlayService implements PlayService {
 
     @Override
     public boolean isFailed() {
-        return false;
+        return currentGuessCount >= maxGuessCount;
     }
 
 }

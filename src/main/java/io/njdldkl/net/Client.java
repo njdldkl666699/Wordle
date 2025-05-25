@@ -1,28 +1,29 @@
 package io.njdldkl.net;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.util.BeanUtils;
 import com.google.common.eventbus.EventBus;
 import io.njdldkl.constant.IntegerConstant;
-import io.njdldkl.pojo.response.GetAnswerResponse;
+import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.pojo.Pair;
+import io.njdldkl.pojo.event.GameOverEvent;
+import io.njdldkl.pojo.request.*;
+import io.njdldkl.pojo.response.*;
 import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
 import io.njdldkl.pojo.event.GameStartedEvent;
 import io.njdldkl.pojo.event.HostLeftEvent;
 import io.njdldkl.pojo.event.UserListUpdatedEvent;
-import io.njdldkl.pojo.request.GetAnswerRequest;
-import io.njdldkl.pojo.request.JoinRoomRequest;
-import io.njdldkl.pojo.request.LeaveRoomRequest;
-import io.njdldkl.pojo.request.StartGameRequest;
-import io.njdldkl.pojo.response.JoinRoomResponse;
-import io.njdldkl.pojo.response.LeaveRoomResponse;
-import io.njdldkl.pojo.response.StartGameResponse;
 import io.njdldkl.util.IpRoomIdUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -50,7 +51,7 @@ public class Client {
         // 通过房间ID解析服务器地址，端口已知
         String host = IpRoomIdUtils.roomIdToIp(roomId);
         serverSocket = new Socket(host, IntegerConstant.PORT);
-        log.info("连接到服务器： {}:{}", host, IntegerConstant.PORT);
+        log.info("连接到服务器：{}:{}", host, IntegerConstant.PORT);
 
         try {
             messageHandler = new ClientMessageHandler();
@@ -75,7 +76,7 @@ public class Client {
     }
 
     /**
-     * 离开房间
+     * 离开房间（异步）
      *
      * @param userId 用户ID
      */
@@ -85,26 +86,53 @@ public class Client {
     }
 
     /**
-     * 房主开始游戏
+     * 房主开始游戏（异步）
      */
     public void startGame(UUID userId, int letterCount) throws IOException {
         log.info("房主{}开始游戏，字母数量：{}", userId, letterCount);
         tcpHelper.sendMessage(new StartGameRequest(userId, letterCount));
     }
 
-    // 答案的Future对象
-    private CompletableFuture<Word> answerFuture;
+    // 同步方式的请求下，等待结果的messageId与Future映射
+    private final Map<UUID, CompletableFuture<?>> pendingFutures = new ConcurrentHashMap<>();
+
+    /**
+     * 检查单词是否有效（同步）
+     */
+    public boolean isValidWord(UUID userId, String word) throws IOException, ExecutionException, InterruptedException {
+        log.info("检查单词是否存在: {}", word);
+        var request = new ValidateWordRequest(userId, word);
+        UUID messageId = request.getMessageId();
+        pendingFutures.put(messageId, new CompletableFuture<Boolean>());
+        tcpHelper.sendMessage(request);
+        return (boolean) pendingFutures.get(messageId).get();
+    }
+
+    /**
+     * 检查单词（同步）
+     */
+    public Pair<Boolean, List<WordStatus>> checkWord(UUID userId, String guessWord)
+            throws IOException, ExecutionException, InterruptedException {
+        log.info("检查单词: {}", guessWord);
+        var request = new CheckWordRequest(userId, guessWord);
+        UUID messageId = request.getMessageId();
+        pendingFutures.put(messageId, new CompletableFuture<Pair<Boolean, List<WordStatus>>>());
+        tcpHelper.sendMessage(request);
+        return (Pair<Boolean, List<WordStatus>>) pendingFutures.get(messageId).get();
+    }
 
     /**
      * <p>获取答案</p>
      * 以同步方式获取答案，获取过程中会阻塞当前线程
      */
-    public Word getAnswer() throws IOException, ExecutionException, InterruptedException {
+    public Word getAnswer(UUID userId) throws IOException, ExecutionException, InterruptedException {
         log.info("获取答案");
-        answerFuture = new CompletableFuture<>();
-        tcpHelper.sendMessage(new GetAnswerRequest());
+        var request = new GetAnswerRequest(userId);
+        UUID messageId = request.getMessageId();
+        pendingFutures.put(messageId, new CompletableFuture<Word>());
+        tcpHelper.sendMessage(request);
         // 阻塞等待结果，转换为同步调用
-        return answerFuture.get();
+        return (Word) pendingFutures.get(messageId).get();
     }
 
     /**
@@ -136,9 +164,13 @@ public class Client {
             switch (type) {
                 case "JoinRoomResponse" -> onJoinRoomResponse(jsonObject.toJavaObject(JoinRoomResponse.class));
                 case "LeaveRoomResponse" -> onLeaveRoomResponse(jsonObject.toJavaObject(LeaveRoomResponse.class));
-                case "HostLeftResponse" -> onHostLeft();
+                case "HostLeftResponse" -> onHostLeft(jsonObject.toJavaObject(HostLeftResponse.class));
                 case "StartGameResponse" -> onStartGame(jsonObject.toJavaObject(StartGameResponse.class));
+                case "ValidateWordResponse" -> onValidateWord(jsonObject.toJavaObject(ValidateWordResponse.class));
+                case "CheckWordResponse" -> onCheckWord(jsonObject.toJavaObject(CheckWordResponse.class));
                 case "GetAnswerResponse" -> onGetAnswerResponse(jsonObject.toJavaObject(GetAnswerResponse.class));
+                case "GameOverResponse" -> onGameOver(jsonObject.toJavaObject(GameOverResponse.class));
+                default -> log.warn("未知消息类型: {}", type);
             }
         }
 
@@ -167,7 +199,7 @@ public class Client {
         eventBus.post(new UserListUpdatedEvent(response.getUserList(), null));
     }
 
-    private void onHostLeft() {
+    private void onHostLeft(HostLeftResponse response) {
         log.info("房主已离开房间");
 
         // 直接发布事件到EventBus
@@ -181,13 +213,49 @@ public class Client {
         eventBus.post(new GameStartedEvent(response.getLetterCount()));
     }
 
-    private void onGetAnswerResponse(GetAnswerResponse response) {
-        log.info("获取答案成功: {}", response);
-        if (answerFuture != null) {
-            // 将答案设置为完成状态
-            answerFuture.complete(response.getAnswer());
-            // 清空Future对象
-            answerFuture = null;
+    private void onValidateWord(ValidateWordResponse response) {
+        log.info("单词验证结果: {}", response);
+
+        // 查找对应的Future
+        UUID messageId = response.getMessageId();
+        var future = (CompletableFuture<Boolean>) pendingFutures.get(messageId);
+        if (future != null) {
+            future.complete(response.isValid());
+        } else {
+            log.warn("未找到对应的单词验证请求: {}", messageId);
         }
+    }
+
+    private void onCheckWord(CheckWordResponse response) {
+        log.info("单词检查结果: {}", response);
+
+        // 查找对应的Future
+        UUID messageId = response.getMessageId();
+        var future = (CompletableFuture<Pair<Boolean, List<WordStatus>>>) pendingFutures.get(messageId);
+        if (future != null) {
+            future.complete(new Pair<>(response.isCorrect(), response.getStatusList()));
+        } else {
+            log.warn("未找到对应的单词检查请求: {}", messageId);
+        }
+    }
+
+    private void onGetAnswerResponse(GetAnswerResponse response) {
+        UUID messageId = response.getMessageId();
+        log.info("收到答案响应 messageId={}", messageId);
+
+        // 查找对应的Future
+        var future = (CompletableFuture<Word>) pendingFutures.get(messageId);
+        if (future != null) {
+            future.complete(response.getAnswer());
+        } else {
+            log.warn("未找到对应的答案请求: {}", messageId);
+        }
+    }
+
+    private void onGameOver(GameOverResponse response) {
+        log.info("游戏结束: {}", response);
+
+        // 发布游戏结束事件到eventBus
+        eventBus.post(new GameOverEvent(response.getAnswer(), response.getWinner(), response.getWinnerDuration()));
     }
 }

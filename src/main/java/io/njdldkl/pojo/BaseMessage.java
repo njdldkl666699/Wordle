@@ -3,8 +3,9 @@ package io.njdldkl.pojo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
-@AllArgsConstructor
 public class BaseMessage {
 
     public BaseMessage() {
@@ -12,6 +13,8 @@ public class BaseMessage {
         this.type = this.getClass().getSimpleName();
     }
 
-    // 请求类型
+    // 消息类型
     private String type;
+    // 消息id，成对的请求和响应用一个id
+    private UUID messageId;
 }

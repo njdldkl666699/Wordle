@@ -1,6 +1,13 @@
 package io.njdldkl.pojo.request;
 
-import io.njdldkl.pojo.BaseMessage;
+import lombok.Data;
 
-public class GetAnswerRequest extends BaseMessage {
+import java.util.UUID;
+
+@Data
+public class GetAnswerRequest extends BaseRequest {
+
+    public GetAnswerRequest(UUID userId) {
+        setUserId(userId);
+    }
 }

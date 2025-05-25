@@ -37,14 +37,17 @@ public class Application {
 //        System.setProperty("sun.java2d.dpiaware", "true");  // 启用DPI感知
 
         log.info("Wordle游戏启动");
-        // 设置系统外观为系统默认
-        try {
-            log.info("设置系统外观");
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        // 使用WindowsManager管理窗口
-        WindowManager.getInstance().showMenuFrame();
+
+        SwingUtilities.invokeLater(()->{
+            // 设置系统外观为系统默认
+            try {
+                log.info("设置系统外观");
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+            // 使用WindowsManager管理窗口
+            WindowManager.getInstance().showMenuFrame();
+        });
     }
 }

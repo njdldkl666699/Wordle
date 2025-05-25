@@ -27,7 +27,7 @@ public class BackHomeDialog extends RoundedShadowDialog {
         JPanel messagePanel = new JPanel();
         messagePanel.setOpaque(false);
         messagePanel.setLayout(new BorderLayout());
-        JLabel messageLabel = new JLabel("<html><div style='text-align: center;'>确定要离开游戏并返回主菜单吗？<br>这将断开与房间的连接。</div></html>");
+        JLabel messageLabel = new JLabel("<html><div style='text-align: center;'>确定要离开游戏并返回主菜单吗？<br>如果是房主，离开将会关闭房间。</div></html>");
         messageLabel.setFont(new Font("Microsoft YaHei", Font.BOLD, 18));
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         messagePanel.add(messageLabel, BorderLayout.CENTER);

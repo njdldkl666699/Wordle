@@ -79,13 +79,56 @@ public class GameOverDialog extends RoundedShadowDialog {
         titleLabel.setText(title);
     }
 
+    private Word currentWord;
+
     /**
      * 设置对话框的文本内容
      *
      * @param word 要显示的单词对象
      */
     public void setWord(Word word) {
+        // 保存当前设置的单词
+        currentWord = word;
+
+        // 更新文本面板内容
+        updateTextPanel();
+    }
+
+    private JPanel extraInfoPanel;
+
+    /**
+     * 添加额外信息面板到文本面板
+     *
+     * @param panel 要添加的面板
+     */
+    public void addExtraInfoPanel(JPanel panel) {
+        // 保存额外信息面板的引用
+        extraInfoPanel = panel;
+
+        // 如果设置过单词，需要重新显示所有内容
+        if (currentWord != null) {
+            updateTextPanel();
+        } else {
+            // 仅显示额外信息面板
+            textPanel.removeAll();
+            textPanel.add(extraInfoPanel);
+            textPanel.add(Box.createVerticalStrut(20)); // 添加间距
+            textPanel.revalidate();
+            textPanel.repaint();
+        }
+    }
+
+    /**
+     * 更新文本面板内容，显示额外信息面板和单词信息
+     */
+    private void updateTextPanel() {
         textPanel.removeAll();
+
+        // 如果有额外信息面板，先添加它
+        if (extraInfoPanel != null) {
+            textPanel.add(extraInfoPanel);
+            textPanel.add(Box.createVerticalStrut(20)); // 添加间距
+        }
 
         // 添加一个垂直空白区域，让内容看起来更居中
         textPanel.add(Box.createVerticalGlue());
@@ -103,7 +146,7 @@ public class GameOverDialog extends RoundedShadowDialog {
         textContentPanel.add(wordTitleLabel);
         textContentPanel.add(Box.createVerticalStrut(15));
 
-        JLabel wordLabel = new JLabel(word.getWord());
+        JLabel wordLabel = new JLabel(currentWord.getWord());
         wordLabel.setFont(new Font("Arial", Font.BOLD, 32));
         wordLabel.setForeground(Color.BLACK);
         wordLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -111,21 +154,28 @@ public class GameOverDialog extends RoundedShadowDialog {
         textContentPanel.add(Box.createVerticalStrut(20));
 
         // 使用文本区域来显示可能很长的释义
-        JTextArea meaningArea = new JTextArea(word.getMeaning());
+        JTextArea meaningArea = new JTextArea(currentWord.getMeaning());
         meaningArea.setFont(new Font("Microsoft YaHei", Font.PLAIN, 20));
         meaningArea.setForeground(Color.BLACK);
         meaningArea.setBackground(Color.WHITE);
         meaningArea.setLineWrap(true);
         meaningArea.setWrapStyleWord(true);
         meaningArea.setEditable(false);
-        meaningArea.setAlignmentX(Component.CENTER_ALIGNMENT);
         meaningArea.setBorder(null);
 
-        // 计算最佳宽度
-        int textWidth = 230;
-        meaningArea.setPreferredSize(new Dimension(textWidth, meaningArea.getPreferredSize().height));
-        textContentPanel.add(meaningArea);
+        // 创建滚动面板来容纳文本区域
+        JScrollPane scrollPane = new JScrollPane(meaningArea);
+        scrollPane.setBorder(null);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // 设置滚动面板的首选尺寸
+        int textWidth = 230;
+        int textHeight = Math.min(150, meaningArea.getPreferredSize().height);
+        scrollPane.setPreferredSize(new Dimension(textWidth, textHeight));
+
+        textContentPanel.add(scrollPane);
         textPanel.add(textContentPanel);
         textPanel.add(Box.createVerticalGlue());
 

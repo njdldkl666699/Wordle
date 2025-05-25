@@ -8,6 +8,7 @@ import io.njdldkl.service.PlayService;
 import io.njdldkl.util.WordUtils;
 
 import java.util.List;
+import java.util.UUID;
 
 public class SinglePlayService implements PlayService {
 
@@ -63,8 +64,6 @@ public class SinglePlayService implements PlayService {
         List<WordStatus> statusList = WordUtils.checkWord(guessWord, answer.getWord());
         boolean correct = statusList.stream()
                 .allMatch(status -> status == WordStatus.CORRECT);
-        // NOTE: 多人对战下，将结果和正确玩家存储在service中
-        // 单人游戏下，直接返回结果
         return new Pair<>(correct, statusList);
     }
 
