@@ -60,6 +60,9 @@ public class WordUtils {
      * @return true 如果单词有效，false 否则
      */
     public static boolean isValidWord(String word) {
+        if(word == null || word.isEmpty()) {
+            return false;
+        }
         // 检查单词是否存在于WORD_MAP中
         // 转换为小写，因为WORD_MAP中的单词都是小写的
         String lowerCase = word.toLowerCase();

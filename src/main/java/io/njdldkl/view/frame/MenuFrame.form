@@ -353,7 +353,7 @@
         <properties>
           <background color="-2301459"/>
           <opaque value="false"/>
-          <visible value="true"/>
+          <visible value="false"/>
         </properties>
         <border type="none"/>
         <children>

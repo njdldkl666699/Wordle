@@ -12,7 +12,14 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
     </properties>
+    <!-- # 设置控制台输出编码为 UTF-8-->
+    <!-- [Console]::OutputEncoding = [System.Text.Encoding]::UTF8-->
+
+    <!-- # 同时修改代码页（可选，但建议一起设置）-->
+    <!-- chcp 65001-->
 
     <dependencies>
         <dependency>
@@ -52,6 +59,133 @@
             <version>33.4.8-jre</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>forms_rt</artifactId>
+            <version>2025.1.1.1</version>
+        </dependency>
+
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 将form文件编译成 java 文件 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>ideauidesigner-maven-plugin</artifactId>
+                <version>2025.1.1.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>javac2</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <fork>true</fork>
+                    <debug>true</debug>
+                    <failOnError>true</failOnError>
+                </configuration>
+            </plugin>
+
+            <!-- 复制 Maven 管理的依赖到 lib 目录 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.7.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 配置MANIFEST.MF -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <archive>
+                        <!-- 生成MANIFEST.MF的设置 -->
+                        <manifest>
+                            <useUniqueVersions>false</useUniqueVersions>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>io.njdldkl.Application</mainClass>
+                        </manifest>
+                    </archive>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                </configuration>
+            </plugin>
+
+            <!-- 将 jar 和 lib 拷贝到 package 目录 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>prepare-package-dir</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.build.directory}/package/lib"/>
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                      todir="${project.build.directory}/package"/>
+                                <copy todir="${project.build.directory}/package/lib">
+                                    <fileset dir="${project.build.directory}/lib"/>
+                                </copy>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 打包成可执行的 APP_IMAGE -->
+            <plugin>
+                <groupId>org.panteleyev</groupId>
+                <artifactId>jpackage-maven-plugin</artifactId>
+                <version>1.6.4</version>
+                <configuration>
+                    <name>Wordle</name>
+                    <appVersion>1.0.0</appVersion>
+                    <vendor>南极大陆的可乐</vendor>
+                    <mainJar>${project.build.finalName}.jar</mainJar>
+                    <mainClass>io.njdldkl.Application</mainClass>
+                    <input>${project.build.directory}/package</input>
+                    <destination>${project.build.directory}/bin/</destination>
+                    <javaOptions>
+                        <javaOption>-Dfile.encoding=UTF-8</javaOption>
+                    </javaOptions>
+                    <icon>${project.basedir}/src/main/resources/icon/wordle.png</icon>
+                    <type>APP_IMAGE</type>
+                    <!--                    <winMenu>true</winMenu>-->
+                    <!--                    <winDirChooser>true</winDirChooser>-->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>win-packaging</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jpackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
 
 </project>
