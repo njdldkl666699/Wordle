@@ -1,3 +1,5 @@
+package io.njdldkl.test;
+
 import io.njdldkl.view.dialog.BackHomeDialog;
 
 public class BackHomeDialogTest {

@@ -184,8 +184,8 @@
               <foreground color="-16777216"/>
               <margin top="2" left="9" bottom="2" right="6"/>
               <opaque value="true"/>
-              <text value="南极大陆的可乐"/>
-              <toolTipText value="昵称"/>
+              <text value="无名词王"/>
+              <toolTipText value=""/>
               <visible value="true"/>
             </properties>
           </component>

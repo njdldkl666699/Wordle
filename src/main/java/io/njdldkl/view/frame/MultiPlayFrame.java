@@ -2,13 +2,16 @@ package io.njdldkl.view.frame;
 
 import com.google.common.eventbus.Subscribe;
 import io.njdldkl.constant.IntegerConstant;
+import io.njdldkl.pojo.PlayStateVO;
 import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
 import io.njdldkl.pojo.event.GameOverEvent;
+import io.njdldkl.pojo.event.PlayStateListShowEvent;
 import io.njdldkl.service.impl.MultiPlayService;
 import io.njdldkl.util.ComponentUtils;
 import io.njdldkl.view.WindowManager;
 import io.njdldkl.view.component.KeyboardPanel;
+import io.njdldkl.view.component.PlayStatePanel;
 import io.njdldkl.view.component.RoundedButton;
 import io.njdldkl.view.dialog.BackHomeDialog;
 import io.njdldkl.view.dialog.GameOverDialog;
@@ -30,15 +33,22 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
     private JScrollPane guessScrollPane;
     private JPanel guessPane;
     private KeyboardPanel keyboardPane;
+    private JScrollPane playStatesScrollPane;
+    private JPanel playStatesPane;
 
     private BackHomeDialog backHomeDialog;
-
-    private JPanel usersPane;
 
     private User currentUser;
 
     public MultiPlayFrame() {
         setContentPane(contentPane);
+
+        // 游戏状态列表面板
+        playStatesPane = new JPanel();
+        playStatesPane.setLayout(new BoxLayout(playStatesPane, BoxLayout.X_AXIS));
+        playStatesPane.setBackground(Color.WHITE);
+        playStatesPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        playStatesScrollPane.setViewportView(playStatesPane);
 
         playFrameHelper = PlayFrameHelper.builder()
                 .frame(this)
@@ -56,7 +66,9 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
 
         playFrameHelper.setupListeners();
         // 返回主菜单按钮
-        homeButton.addActionListener(e -> backHomeDialog.setVisible(true));
+        homeButton.addActionListener(e -> {
+
+        });
         // 认输按钮
         giveUpButton.addActionListener(e -> handleGiveUpButtonPressed());
     }
@@ -121,6 +133,27 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
         guessPane = new JPanel();
         guessPane.setBackground(Color.WHITE);
         guessPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    }
+
+    @Subscribe
+    public void onPlayListShow(PlayStateListShowEvent event) {
+        // 清空当前的游戏状态面板
+        playStatesPane.removeAll();
+
+        for (PlayStateVO playStateVO : event.playStateVOList()) {
+            // 创建一个玩家的游戏状态面板
+            PlayStatePanel playStatePanel = new PlayStatePanel(
+                    playStateVO.getAvatar(), playStateVO.getName(),
+                    playStateVO.getCorrectCount(), playStateVO.getWrongPositionCount());
+
+            playStatesPane.add(playStatePanel);
+            playStatesPane.add(Box.createHorizontalStrut(10));
+        }
+
+        playStatesPane.revalidate();
+        playStatesPane.repaint();
+        playStatesScrollPane.revalidate();
+        playStatesScrollPane.repaint();
     }
 
     // 标记是否已经显示了游戏结束对话框
@@ -233,12 +266,12 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
         if (multiPlayService != null) {
             if (multiPlayService.isHost(currentUser.getId())) {
                 // 如果是房主，二次确认离开房间
+                backHomeDialog.addConfirmButtonListener(e -> gameOverDialog.dispose());
                 backHomeDialog.setVisible(true);
-                return;
+            } else {
+                // 非房主直接离开房间
+                multiPlayService.leaveRoom();
             }
-
-            // 非房主直接离开房间
-            multiPlayService.leaveRoom();
         }
 
         gameOverDialog.setVisible(false);

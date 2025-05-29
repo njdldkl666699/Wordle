@@ -1,3 +1,5 @@
+package io.njdldkl.test;
+
 import io.njdldkl.view.component.RoundedLetterPanel;
 
 import javax.swing.*;

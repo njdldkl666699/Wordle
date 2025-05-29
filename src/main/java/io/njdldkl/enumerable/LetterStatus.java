@@ -1,9 +1,9 @@
 package io.njdldkl.enumerable;
 
 /**
- * 单词状态
+ * 字母状态
  */
-public enum WordStatus {
+public enum LetterStatus {
 
     // 字母正确且位置正确
     CORRECT,

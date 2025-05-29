@@ -10,8 +10,8 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class StartGameResponse extends BaseMessage {
+public class PlayStatesUpdatedResponse extends BaseMessage {
 
-    // 字母数量
-    private int letterCount;
+    // 用户游戏状态列表
+    private Map<UUID, PlayState> playStates;
 }

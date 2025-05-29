@@ -2,7 +2,7 @@ package io.njdldkl.util;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
-import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.enumerable.LetterStatus;
 import io.njdldkl.pojo.Word;
 import lombok.extern.slf4j.Slf4j;
 
@@ -79,7 +79,7 @@ public class WordUtils {
      * @param answer    正确单词
      * @return 单词状态列表
      */
-    public static List<WordStatus> checkWord(String guessWord, String answer) {
+    public static List<LetterStatus> checkWord(String guessWord, String answer) {
         // 检查单词长度是否一致
         if (guessWord.length() != answer.length()) {
             throw new IllegalArgumentException("猜测单词和答案长度不一致");
@@ -91,8 +91,8 @@ public class WordUtils {
         int length = answer.length();
 
         // 初始化状态列表，默认所有字母都不在单词中
-        List<WordStatus> statusList = new ArrayList<>(
-                Collections.nCopies(guessWord.length(), WordStatus.ABSENT));
+        List<LetterStatus> statusList = new ArrayList<>(
+                Collections.nCopies(guessWord.length(), LetterStatus.ABSENT));
 
         // 用于统计字母出现的次数
         int[] letterCount = new int[26];
@@ -102,17 +102,17 @@ public class WordUtils {
         // 第一遍：标记完全正确的字母
         for (int i = 0; i < length; i++) {
             if (guessWord.charAt(i) == answer.charAt(i)) {
-                statusList.set(i, WordStatus.CORRECT);
+                statusList.set(i, LetterStatus.CORRECT);
                 letterCount[guessWord.charAt(i) - 'A']--;
             }
         }
 
         // 第二遍：处理位置错误的字母
         for (int i = 0; i < guessWord.length(); i++) {
-            if (statusList.get(i) != WordStatus.CORRECT) {
+            if (statusList.get(i) != LetterStatus.CORRECT) {
                 char c = guessWord.charAt(i);
                 if (letterCount[c - 'A'] > 0) {
-                    statusList.set(i, WordStatus.WRONG_POSITION);
+                    statusList.set(i, LetterStatus.WRONG_POSITION);
                     letterCount[c - 'A']--;
                 }
             }

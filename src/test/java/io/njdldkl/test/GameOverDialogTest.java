@@ -1,3 +1,5 @@
+package io.njdldkl.test;
+
 import io.njdldkl.pojo.Word;
 import io.njdldkl.view.dialog.GameOverDialog;
 

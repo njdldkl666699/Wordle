@@ -56,6 +56,7 @@
         </constraints>
         <properties>
           <background color="-1"/>
+          <horizontalScrollBarPolicy value="30"/>
           <visible value="true"/>
         </properties>
         <border type="none"/>
@@ -119,18 +120,22 @@
           <text value="认输"/>
         </properties>
       </component>
-      <grid id="49c98" binding="usersPane" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="1">
+      <scrollpane id="d4176" binding="playStatesScrollPane">
         <constraints>
-          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="-1" height="52"/>
+            <maximum-size width="-1" height="52"/>
+          </grid>
         </constraints>
         <properties>
           <background color="-1"/>
-          <foreground color="-16777216"/>
+          <horizontalScrollBarPolicy value="30"/>
           <opaque value="false"/>
+          <verticalScrollBarPolicy value="21"/>
         </properties>
         <border type="none"/>
         <children/>
-      </grid>
+      </scrollpane>
     </children>
   </grid>
 </form>

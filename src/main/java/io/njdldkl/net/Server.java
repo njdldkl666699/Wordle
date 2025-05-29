@@ -2,8 +2,9 @@ package io.njdldkl.net;
 
 import com.alibaba.fastjson2.JSONObject;
 import io.njdldkl.constant.IntegerConstant;
-import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.enumerable.LetterStatus;
 import io.njdldkl.pojo.BaseMessage;
+import io.njdldkl.pojo.PlayState;
 import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
 import io.njdldkl.pojo.request.*;
@@ -107,6 +108,11 @@ public class Server {
     // 房间内的用户列表
     private final Map<UUID, User> users = new ConcurrentHashMap<>();
 
+    // 用户游戏状态列表
+    private final Map<UUID, PlayState> userPlayStates = new ConcurrentHashMap<>();
+    // 用户键盘状态（用于统计字母状态）
+    private final Map<UUID, LetterStatus[]> userKeyBoards = new ConcurrentHashMap<>();
+
     // 正确单词
     private Word answer;
 
@@ -184,6 +190,13 @@ public class Server {
         leaveRoomResponse.setMessageId(request.getMessageId());
         // 广播给所有连接的客户端
         broadcastToAllClients(leaveRoomResponse);
+
+        // 更新用户键盘状态
+        userKeyBoards.remove(userId);
+        // 更新用户游戏状态
+        userPlayStates.remove(userId);
+        // 广播更新游戏状态
+        broadcastToAllClients(new PlayStatesUpdatedResponse(userPlayStates));
     }
 
     /**
@@ -200,11 +213,21 @@ public class Server {
             return;
         }
 
+        // 生成正确单词
+        answer = WordUtils.getRandomWord(letterCount);
+
         // 广播给所有连接的客户端
         broadcastToAllClients(new StartGameResponse(letterCount));
 
-        // 生成正确单词
-        answer = WordUtils.getRandomWord(letterCount);
+        // 初始化用户游戏状态
+        for (UUID id : users.keySet()) {
+            userPlayStates.put(id, new PlayState(0, 0));
+            userKeyBoards.put(id, new LetterStatus[26]);
+        }
+
+        // 广播更新游戏状态
+        broadcastToAllClients(new PlayStatesUpdatedResponse(userPlayStates));
+
         // 记录游戏开始时间
         startTime = System.currentTimeMillis();
     }
@@ -250,24 +273,83 @@ public class Server {
         log.info("检查单词: {} (来自用户 {})", guessWord, userId);
 
         // 检查单词
-        List<WordStatus> statusList = WordUtils.checkWord(guessWord, answer.getWord());
+        List<LetterStatus> statusList = WordUtils.checkWord(guessWord, answer.getWord());
         boolean correct = statusList.stream()
-                .allMatch(status -> status == WordStatus.CORRECT);
+                .allMatch(status -> status == LetterStatus.CORRECT);
+
+        // 更新用户键盘状态
+        updateUserKeyBoard(userId, guessWord, statusList);
+
+        // 更新用户游戏状态
+        PlayState playState = userPlayStates.get(userId);
+        playState.setCorrectCount(getLetterStatusCount(userId, LetterStatus.CORRECT));
+        playState.setWrongPositionCount(getLetterStatusCount(userId, LetterStatus.WRONG_POSITION));
+        userPlayStates.put(userId, playState);
+
+        // 发送更新游戏状态给所有客户端
+        broadcastToAllClients(new PlayStatesUpdatedResponse(userPlayStates));
 
         // 如果正确，记录游戏结束时间
         if (correct) {
             endTime = System.currentTimeMillis();
             log.info("用户 {} 猜对了单词: {}", userId, guessWord);
-            User winner= users.get(userId);
+            User winner = users.get(userId);
             // 广播游戏结束消息
             broadcastToAllClients(new GameOverResponse(answer, winner, endTime - startTime));
         }
 
+        // 发送响应给请求的客户端
         CheckWordResponse response = new CheckWordResponse(correct, statusList);
         response.setMessageId(request.getMessageId());
-
-        // 发送响应给请求的客户端
         sendToClient(userId, response);
+    }
+
+    /**
+     * 根据单词状态更新用户键盘状态
+     */
+    private void updateUserKeyBoard(UUID userId, String guessWord, List<LetterStatus> statusList) {
+        LetterStatus[] keyboard = userKeyBoards.get(userId);
+        if (keyboard == null) {
+            keyboard = new LetterStatus[26]; // 初始化键盘状态
+            userKeyBoards.put(userId, keyboard);
+        }
+
+        String lowerGuessWord = guessWord.toLowerCase();
+        for (int i = 0; i < lowerGuessWord.length(); i++) {
+            char letter = lowerGuessWord.charAt(i);
+            int index = letter - 'a';
+            if (index >= 0 && index < 26) {
+                LetterStatus oldStatus = keyboard[index];
+                LetterStatus newStatus = statusList.get(i);
+                // 需要更新的情况：
+                // 1. 新状态是错误位置且旧状态不是正确
+                // 2. 新状态是正确
+                // 3. 旧状态为空
+                if (newStatus == LetterStatus.WRONG_POSITION && oldStatus != LetterStatus.CORRECT
+                        || newStatus == LetterStatus.CORRECT
+                        || oldStatus == null) {
+                    keyboard[index] = newStatus;
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取用户的字母状态计数
+     */
+    private int getLetterStatusCount(UUID userID, LetterStatus letterStatus) {
+        LetterStatus[] keyboard = userKeyBoards.get(userID);
+        if (keyboard == null) {
+            return 0;
+        }
+
+        int count = 0;
+        for (LetterStatus status : keyboard) {
+            if (status == letterStatus) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**

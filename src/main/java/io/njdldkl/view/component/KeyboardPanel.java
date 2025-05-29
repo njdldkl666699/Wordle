@@ -2,7 +2,7 @@ package io.njdldkl.view.component;
 
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.IntegerConstant;
-import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.enumerable.LetterStatus;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +20,7 @@ public class KeyboardPanel extends JPanel {
     // 按键映射
     private final Map<String, RoundedButton> keyButtons = new HashMap<>();
     // 按键状态映射
-    private final Map<String, WordStatus> keyStatusMap = new HashMap<>();
+    private final Map<String, LetterStatus> keyStatusMap = new HashMap<>();
 
     // 按键样式常量
     private static final int BUTTON_HEIGHT = 50;
@@ -115,7 +115,7 @@ public class KeyboardPanel extends JPanel {
         }
 
         // 更新按键状态
-        keyStatusMap.put(key, WordStatus.CORRECT);
+        keyStatusMap.put(key, LetterStatus.CORRECT);
     }
 
     /**
@@ -129,9 +129,9 @@ public class KeyboardPanel extends JPanel {
         }
 
         // 更新按键状态
-        WordStatus wordStatus = keyStatusMap.get(key);
-        if (wordStatus != WordStatus.CORRECT) {
-            keyStatusMap.put(key, WordStatus.WRONG_POSITION);
+        LetterStatus letterStatus = keyStatusMap.get(key);
+        if (letterStatus != LetterStatus.CORRECT) {
+            keyStatusMap.put(key, LetterStatus.WRONG_POSITION);
         }
     }
 
@@ -146,9 +146,9 @@ public class KeyboardPanel extends JPanel {
         }
 
         // 更新按键状态
-        WordStatus wordStatus = keyStatusMap.get(key);
-        if (wordStatus != WordStatus.CORRECT && wordStatus != WordStatus.WRONG_POSITION) {
-            keyStatusMap.put(key, WordStatus.ABSENT);
+        LetterStatus letterStatus = keyStatusMap.get(key);
+        if (letterStatus != LetterStatus.CORRECT && letterStatus != LetterStatus.WRONG_POSITION) {
+            keyStatusMap.put(key, LetterStatus.ABSENT);
         }
     }
 

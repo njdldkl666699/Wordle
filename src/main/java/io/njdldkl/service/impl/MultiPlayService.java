@@ -2,22 +2,16 @@ package io.njdldkl.service.impl;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.enumerable.LetterStatus;
 import io.njdldkl.net.Client;
 import io.njdldkl.net.Server;
-import io.njdldkl.pojo.Pair;
-import io.njdldkl.pojo.User;
-import io.njdldkl.pojo.Word;
-import io.njdldkl.pojo.event.GameStartedEvent;
-import io.njdldkl.pojo.event.HostLeftEvent;
-import io.njdldkl.pojo.event.UserListUpdatedEvent;
+import io.njdldkl.pojo.*;
+import io.njdldkl.pojo.event.*;
 import io.njdldkl.service.PlayService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -39,7 +33,8 @@ public class MultiPlayService implements PlayService {
     }
 
     // 当前房间的用户列表
-    private final List<User> users = new CopyOnWriteArrayList<>();
+    // 缓存用户名和头像（主要），减少头像的网络传输
+    private final Map<UUID, User> users = new HashMap<>();
 
     // 注册事件监听器
     public void registerEventListener(Object listener) {
@@ -69,8 +64,8 @@ public class MultiPlayService implements PlayService {
             // 如果出错，返回只包含当前用户的列表
             log.error("注册用户失败: ", e);
             users.clear();
-            users.add(user);
-            eventBus.post(new UserListUpdatedEvent(users, host ? user : null));
+            users.put(currentUser.getId(), user);
+            eventBus.post(new UserListUpdatedEvent((List<User>) users.values(), host ? user : null));
         }
     }
 
@@ -79,7 +74,7 @@ public class MultiPlayService implements PlayService {
      */
     public void leaveRoom() {
         // 从用户列表中移除当前用户
-        users.remove(currentUser);
+        users.remove(currentUser.getId());
 
         // 通知服务器当前用户离开房间
         try {
@@ -103,7 +98,9 @@ public class MultiPlayService implements PlayService {
     @Subscribe
     public void onUserListUpdated(UserListUpdatedEvent event) {
         this.users.clear();
-        this.users.addAll(event.users());
+        for (User user : event.users()) {
+            this.users.put(user.getId(), user);
+        }
 
         User hostUser = event.hostUser();
         if (hostUser != null) {
@@ -197,7 +194,7 @@ public class MultiPlayService implements PlayService {
     }
 
     @Override
-    public Pair<Boolean, List<WordStatus>> checkWord(String guessWord) {
+    public Pair<Boolean, List<LetterStatus>> checkWord(String guessWord) {
         if (client == null || !client.isConnected()) {
             throw new IllegalStateException("客户端未连接或已关闭");
         }
@@ -209,6 +206,29 @@ public class MultiPlayService implements PlayService {
         } catch (IOException | InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Subscribe
+    public void onPlayStateListUpdated(PlayStateListUpdatedEvent event) {
+        List<PlayStateVO> playStateVOList = new ArrayList<>();
+
+        Map<UUID, PlayState> userPlayStates = event.playStateList();
+        for (UUID userId : userPlayStates.keySet()) {
+            PlayState playState = userPlayStates.get(userId);
+            User user = users.get(userId);
+
+            // 封装成VO
+            PlayStateVO playStateVO = PlayStateVO.builder()
+                    .name(user.getName())
+                    .avatar(user.getAvatar())
+                    .correctCount(playState.getCorrectCount())
+                    .wrongPositionCount(playState.getWrongPositionCount())
+                    .build();
+            playStateVOList.add(playStateVO);
+        }
+
+        // 发布事件，通知view层更新
+        eventBus.post(new PlayStateListShowEvent(playStateVOList));
     }
 
     @Override

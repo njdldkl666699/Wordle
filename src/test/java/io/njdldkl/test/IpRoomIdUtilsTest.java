@@ -1,3 +1,5 @@
+package io.njdldkl.test;
+
 import io.njdldkl.util.IpRoomIdUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

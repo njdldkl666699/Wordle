@@ -3,7 +3,7 @@ package io.njdldkl.view.frame;
 import io.njdldkl.constant.ColorConstant;
 import io.njdldkl.constant.DimensionConstant;
 import io.njdldkl.constant.IntegerConstant;
-import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.enumerable.LetterStatus;
 import io.njdldkl.pojo.Pair;
 import io.njdldkl.pojo.Word;
 import io.njdldkl.service.PlayService;
@@ -209,16 +209,16 @@ public class PlayFrameHelper {
         }
 
         // 检查是否猜测正确
-        Pair<Boolean, List<WordStatus>> pairResult = playService.checkWord(guessWord);
+        Pair<Boolean, List<LetterStatus>> pairResult = playService.checkWord(guessWord);
         boolean correct = pairResult.getFirst();
-        List<WordStatus> wordStatusList = pairResult.getSecond();
+        List<LetterStatus> letterStatusList = pairResult.getSecond();
 
         // 构造字母和状态的列表
-        List<Pair<String, WordStatus>> pairList = new ArrayList<>();
-        for (int i = 0; i < wordStatusList.size(); i++) {
+        List<Pair<String, LetterStatus>> pairList = new ArrayList<>();
+        for (int i = 0; i < letterStatusList.size(); i++) {
             String letter = guessWord.substring(i, i + 1);
-            WordStatus wordStatus = wordStatusList.get(i);
-            pairList.add(new Pair<>(letter, wordStatus));
+            LetterStatus letterStatus = letterStatusList.get(i);
+            pairList.add(new Pair<>(letter, letterStatus));
         }
         // 更新当前行的字母面板颜色
         updateLetterPanelByStatusList(pairList);
@@ -275,16 +275,16 @@ public class PlayFrameHelper {
     /**
      * 根据单词状态映射更新字母面板的颜色
      */
-    private void updateLetterPanelByStatusList(List<Pair<String, WordStatus>> pairList) {
+    private void updateLetterPanelByStatusList(List<Pair<String, LetterStatus>> pairList) {
         JPanel letterRow = (JPanel) guessPane.getComponent(currentRow);
         for (int i = 0; i < totalCol; i++) {
             RoundedLetterPanel letterPanel = (RoundedLetterPanel) letterRow.getComponent(i);
-            WordStatus wordStatus = pairList.get(i).getSecond();
+            LetterStatus letterStatus = pairList.get(i).getSecond();
 
             // 设置无边框
             letterPanel.setHasBorder(false);
             // 设置背景颜色
-            Color bgColor = switch (wordStatus) {
+            Color bgColor = switch (letterStatus) {
                 case CORRECT -> ColorConstant.GREEN;
                 case WRONG_POSITION -> ColorConstant.YELLOW;
                 case ABSENT -> ColorConstant.GRAY;
@@ -296,11 +296,11 @@ public class PlayFrameHelper {
     /**
      * 据单词状态映射更新键盘的颜色
      */
-    private void updateKeyboardByStatusList(List<Pair<String, WordStatus>> pairList) {
-        for (Pair<String, WordStatus> pair : pairList) {
+    private void updateKeyboardByStatusList(List<Pair<String, LetterStatus>> pairList) {
+        for (Pair<String, LetterStatus> pair : pairList) {
             String letter = pair.getFirst();
-            WordStatus wordStatus = pair.getSecond();
-            switch (wordStatus) {
+            LetterStatus letterStatus = pair.getSecond();
+            switch (letterStatus) {
                 case CORRECT -> keyboardPane.setCorrect(letter);
                 case WRONG_POSITION -> keyboardPane.setWrongPosition(letter);
                 case ABSENT -> keyboardPane.setAbsent(letter);

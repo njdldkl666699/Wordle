@@ -1,12 +1,11 @@
 package io.njdldkl.service;
 
-import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.enumerable.LetterStatus;
 import io.njdldkl.pojo.Pair;
 import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 游戏服务接口，处理游戏判断逻辑和数据存储传输
@@ -42,7 +41,7 @@ public interface PlayService {
      * @param guessWord 猜测单词
      * @return 正确与否，单词状态列表
      */
-    Pair<Boolean,List<WordStatus>> checkWord(String guessWord);
+    Pair<Boolean,List<LetterStatus>> checkWord(String guessWord);
 
     /**
      * 获取正确单词

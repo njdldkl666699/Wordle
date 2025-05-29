@@ -1,7 +1,8 @@
 package io.njdldkl;
 
 import com.alibaba.fastjson2.JSON;
-import io.njdldkl.pojo.User;
+import io.njdldkl.serial.ImageIconDeserializer;
+import io.njdldkl.serial.ImageIconSerializer;
 import io.njdldkl.view.WindowManager;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,8 +28,8 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        JSON.register(ImageIcon.class, new User.ImageIconSerializer());
-        JSON.register(ImageIcon.class, new User.ImageIconDeserializer());
+        JSON.register(ImageIcon.class, new ImageIconSerializer());
+        JSON.register(ImageIcon.class, new ImageIconDeserializer());
 
         System.out.println(BANNER);
 

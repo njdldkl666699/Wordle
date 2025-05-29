@@ -139,7 +139,7 @@ public class GameOverDialog extends RoundedShadowDialog {
         textContentPanel.setOpaque(false);
         textContentPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel wordTitleLabel = new JLabel("答案是：");
+        JLabel wordTitleLabel = new JLabel("答案是");
         wordTitleLabel.setFont(new Font("Microsoft YaHei", Font.BOLD, 24));
         wordTitleLabel.setForeground(Color.BLACK);
         wordTitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -165,6 +165,8 @@ public class GameOverDialog extends RoundedShadowDialog {
 
         // 创建滚动面板来容纳文本区域
         JScrollPane scrollPane = new JScrollPane(meaningArea);
+        // 设置滚动面板的最大尺寸为很大
+        scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         scrollPane.setBorder(null);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);

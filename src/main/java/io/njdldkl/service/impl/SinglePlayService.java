@@ -1,6 +1,6 @@
 package io.njdldkl.service.impl;
 
-import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.enumerable.LetterStatus;
 import io.njdldkl.pojo.Pair;
 import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
@@ -8,7 +8,6 @@ import io.njdldkl.service.PlayService;
 import io.njdldkl.util.WordUtils;
 
 import java.util.List;
-import java.util.UUID;
 
 public class SinglePlayService implements PlayService {
 
@@ -59,11 +58,11 @@ public class SinglePlayService implements PlayService {
      * 检查单词
      */
     @Override
-    public Pair<Boolean, List<WordStatus>> checkWord(String guessWord) {
+    public Pair<Boolean, List<LetterStatus>> checkWord(String guessWord) {
         currentGuessCount++;
-        List<WordStatus> statusList = WordUtils.checkWord(guessWord, answer.getWord());
+        List<LetterStatus> statusList = WordUtils.checkWord(guessWord, answer.getWord());
         boolean correct = statusList.stream()
-                .allMatch(status -> status == WordStatus.CORRECT);
+                .allMatch(status -> status == LetterStatus.CORRECT);
         return new Pair<>(correct, statusList);
     }
 

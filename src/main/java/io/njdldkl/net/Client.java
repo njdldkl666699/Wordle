@@ -1,19 +1,16 @@
 package io.njdldkl.net;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.util.BeanUtils;
 import com.google.common.eventbus.EventBus;
 import io.njdldkl.constant.IntegerConstant;
-import io.njdldkl.enumerable.WordStatus;
+import io.njdldkl.enumerable.LetterStatus;
 import io.njdldkl.pojo.Pair;
-import io.njdldkl.pojo.event.GameOverEvent;
+import io.njdldkl.pojo.PlayState;
+import io.njdldkl.pojo.event.*;
 import io.njdldkl.pojo.request.*;
 import io.njdldkl.pojo.response.*;
 import io.njdldkl.pojo.User;
 import io.njdldkl.pojo.Word;
-import io.njdldkl.pojo.event.GameStartedEvent;
-import io.njdldkl.pojo.event.HostLeftEvent;
-import io.njdldkl.pojo.event.UserListUpdatedEvent;
 import io.njdldkl.util.IpRoomIdUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -111,14 +108,14 @@ public class Client {
     /**
      * 检查单词（同步）
      */
-    public Pair<Boolean, List<WordStatus>> checkWord(UUID userId, String guessWord)
+    public Pair<Boolean, List<LetterStatus>> checkWord(UUID userId, String guessWord)
             throws IOException, ExecutionException, InterruptedException {
         log.info("检查单词: {}", guessWord);
         var request = new CheckWordRequest(userId, guessWord);
         UUID messageId = request.getMessageId();
-        pendingFutures.put(messageId, new CompletableFuture<Pair<Boolean, List<WordStatus>>>());
+        pendingFutures.put(messageId, new CompletableFuture<Pair<Boolean, List<LetterStatus>>>());
         tcpHelper.sendMessage(request);
-        return (Pair<Boolean, List<WordStatus>>) pendingFutures.get(messageId).get();
+        return (Pair<Boolean, List<LetterStatus>>) pendingFutures.get(messageId).get();
     }
 
     /**
@@ -169,6 +166,8 @@ public class Client {
                 case "ValidateWordResponse" -> onValidateWord(jsonObject.toJavaObject(ValidateWordResponse.class));
                 case "CheckWordResponse" -> onCheckWord(jsonObject.toJavaObject(CheckWordResponse.class));
                 case "GetAnswerResponse" -> onGetAnswerResponse(jsonObject.toJavaObject(GetAnswerResponse.class));
+                case "PlayStatesUpdatedResponse" ->
+                        onPlayStatesUpdated(jsonObject.toJavaObject(PlayStatesUpdatedResponse.class));
                 case "GameOverResponse" -> onGameOver(jsonObject.toJavaObject(GameOverResponse.class));
                 default -> log.warn("未知消息类型: {}", type);
             }
@@ -231,12 +230,21 @@ public class Client {
 
         // 查找对应的Future
         UUID messageId = response.getMessageId();
-        var future = (CompletableFuture<Pair<Boolean, List<WordStatus>>>) pendingFutures.get(messageId);
+        var future = (CompletableFuture<Pair<Boolean, List<LetterStatus>>>) pendingFutures.get(messageId);
         if (future != null) {
             future.complete(new Pair<>(response.isCorrect(), response.getStatusList()));
         } else {
             log.warn("未找到对应的单词检查请求: {}", messageId);
         }
+    }
+
+    private void onPlayStatesUpdated(PlayStatesUpdatedResponse response) {
+        log.info("用户游戏状态列表更新: {}", response);
+        Map<UUID, PlayState> playStates = response.getPlayStates();
+
+        // 发布用户游戏状态更新事件到eventBus
+        // 转发给service来处理
+        eventBus.post(new PlayStateListUpdatedEvent(playStates));
     }
 
     private void onGetAnswerResponse(GetAnswerResponse response) {

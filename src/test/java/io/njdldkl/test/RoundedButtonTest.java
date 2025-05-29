@@ -1,3 +1,5 @@
+package io.njdldkl.test;
+
 import io.njdldkl.view.component.RoundedButton;
 
 import javax.swing.*;

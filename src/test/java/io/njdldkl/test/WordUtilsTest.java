@@ -1,4 +1,6 @@
-import io.njdldkl.enumerable.WordStatus;
+package io.njdldkl.test;
+
+import io.njdldkl.enumerable.LetterStatus;
 import io.njdldkl.pojo.Word;
 import io.njdldkl.util.WordUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -54,9 +56,9 @@ public class WordUtilsTest {
 
     @ParameterizedTest
     @MethodSource
-    public void testCheckWord(String guessWord, String answer, List<WordStatus> expected) {
+    public void testCheckWord(String guessWord, String answer, List<LetterStatus> expected) {
         // 执行测试
-        List<WordStatus> result = WordUtils.checkWord(guessWord, answer);
+        List<LetterStatus> result = WordUtils.checkWord(guessWord, answer);
 
         // 验证结果
         assertEquals(expected, result, String.format("猜测单词: %s, 答案: %s", guessWord, answer));
@@ -66,30 +68,30 @@ public class WordUtilsTest {
         return Stream.of(
                 // 完全匹配
                 Arguments.of("apple", "apple",
-                        List.of(WordStatus.CORRECT, WordStatus.CORRECT, WordStatus.CORRECT,
-                                WordStatus.CORRECT, WordStatus.CORRECT)),
+                        List.of(LetterStatus.CORRECT, LetterStatus.CORRECT, LetterStatus.CORRECT,
+                                LetterStatus.CORRECT, LetterStatus.CORRECT)),
 
                 // 完全不匹配
                 Arguments.of("abcde", "fghij",
-                        List.of(WordStatus.ABSENT, WordStatus.ABSENT,
-                                WordStatus.ABSENT, WordStatus.ABSENT,
-                                WordStatus.ABSENT)),
+                        List.of(LetterStatus.ABSENT, LetterStatus.ABSENT,
+                                LetterStatus.ABSENT, LetterStatus.ABSENT,
+                                LetterStatus.ABSENT)),
 
                 // 部分匹配 - 示例中的情况
                 Arguments.of("apael", "apple",
-                        List.of(WordStatus.CORRECT, WordStatus.CORRECT, WordStatus.ABSENT,
-                                WordStatus.WRONG_POSITION, WordStatus.WRONG_POSITION)),
+                        List.of(LetterStatus.CORRECT, LetterStatus.CORRECT, LetterStatus.ABSENT,
+                                LetterStatus.WRONG_POSITION, LetterStatus.WRONG_POSITION)),
 
                 // 重复字母测试
                 Arguments.of("aabbc", "abcba",
-                        List.of(WordStatus.CORRECT, WordStatus.WRONG_POSITION,
-                                WordStatus.WRONG_POSITION, WordStatus.CORRECT,
-                                WordStatus.WRONG_POSITION)),
+                        List.of(LetterStatus.CORRECT, LetterStatus.WRONG_POSITION,
+                                LetterStatus.WRONG_POSITION, LetterStatus.CORRECT,
+                                LetterStatus.WRONG_POSITION)),
 
                 // 大小写混合测试
                 Arguments.of("ApPlE", "aPpLe",
-                        List.of(WordStatus.CORRECT, WordStatus.CORRECT, WordStatus.CORRECT,
-                                WordStatus.CORRECT, WordStatus.CORRECT))
+                        List.of(LetterStatus.CORRECT, LetterStatus.CORRECT, LetterStatus.CORRECT,
+                                LetterStatus.CORRECT, LetterStatus.CORRECT))
         );
     }
 }
