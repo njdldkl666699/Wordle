@@ -2,7 +2,6 @@ package io.njdldkl.pojo.request;
 
 import io.njdldkl.pojo.User;
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class JoinRoomRequest extends BaseRequest {

@@ -1,7 +1,5 @@
 package io.njdldkl.view.component;
 
-import lombok.Setter;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;

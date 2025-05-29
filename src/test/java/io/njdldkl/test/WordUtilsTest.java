@@ -31,9 +31,8 @@ public class WordUtilsTest {
         log.debug("获取的随机单词: {}", randomWord);
 
         // 测试获取不存在的长度的单词
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            WordUtils.getRandomWord(12);
-        });
+        Exception exception = assertThrows(IllegalArgumentException.class,
+                () -> WordUtils.getRandomWord(12));
         assertEquals("12长度的单词未找到", exception.getMessage());
     }
 

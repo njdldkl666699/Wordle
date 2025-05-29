@@ -1,10 +1,8 @@
 package io.njdldkl.view;
 
 import io.njdldkl.pojo.User;
-import io.njdldkl.pojo.Word;
 import io.njdldkl.service.impl.MultiPlayService;
 import io.njdldkl.util.IpRoomIdUtils;
-import io.njdldkl.view.dialog.BackHomeDialog;
 import io.njdldkl.view.dialog.EasterEggDialog;
 import io.njdldkl.view.dialog.GameOverDialog;
 import io.njdldkl.view.dialog.HelpDialog;
@@ -154,8 +152,10 @@ public class WindowManager {
     public void showEasterEggDialog() {
         if (easterEggDialog == null) {
             log.info("创建彩蛋对话框");
-            easterEggDialog = new EasterEggDialog(menuFrame);
+            easterEggDialog = new EasterEggDialog();
+            easterEggDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         }
+        easterEggDialog.resetDialog();
         easterEggDialog.setVisible(true);
     }
 

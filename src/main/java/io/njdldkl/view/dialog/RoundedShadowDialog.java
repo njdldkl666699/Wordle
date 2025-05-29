@@ -14,8 +14,6 @@ import java.awt.geom.RoundRectangle2D;
  */
 public class RoundedShadowDialog extends JDialog {
 
-    private final JPanel windowPane;
-
     protected final JPanel contentPane;
 
     public RoundedShadowDialog(JFrame parent) {
@@ -24,7 +22,7 @@ public class RoundedShadowDialog extends JDialog {
         setUndecorated(true);
 
         // 创建窗口面板
-        windowPane = createWindowPane();
+        JPanel windowPane = createWindowPane();
         windowPane.setBackground(Color.WHITE);
         windowPane.setLayout(new BorderLayout());
         // 设置东南西北的空内容

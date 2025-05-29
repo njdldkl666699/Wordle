@@ -136,7 +136,7 @@ public class TcpJsonHelper {
     /**
      * 异步消息处理器接口
      */
-    public static interface MessageHandler {
+    public interface MessageHandler {
 
         /**
          * 处理接收到的JSON消息

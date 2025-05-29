@@ -76,7 +76,7 @@ public class HelpDialog extends JDialog {
         mainPanel.add(startLabel);
         mainPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // 添加示例单词"TABLE"
+        // 添加示例单词 "TABLE"
         JPanel tablePanel = createWordPanel(new String[]{"T", "A", "B", "L", "E"},
                 new Color[]{ColorConstant.GRAY, ColorConstant.YELLOW, ColorConstant.GRAY, ColorConstant.YELLOW, ColorConstant.GREEN});
         mainPanel.add(tablePanel);
