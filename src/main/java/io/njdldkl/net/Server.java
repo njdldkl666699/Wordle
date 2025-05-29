@@ -85,6 +85,8 @@ public class Server {
                 case "JoinRoomRequest" -> joinRoom(jsonObject.toJavaObject(JoinRoomRequest.class));
                 case "LeaveRoomRequest" -> leaveRoom(jsonObject.toJavaObject(LeaveRoomRequest.class));
                 case "StartGameRequest" -> startGame(jsonObject.toJavaObject(StartGameRequest.class));
+                case "PlayStatesUpdateRequest" ->
+                        updatePlayStates(jsonObject.toJavaObject(PlayStatesUpdateRequest.class));
                 case "ValidateWordRequest" -> validateWord(jsonObject.toJavaObject(ValidateWordRequest.class));
                 case "CheckWordRequest" -> checkWord(jsonObject.toJavaObject(CheckWordRequest.class));
                 case "GetAnswerRequest" -> getAnswer(jsonObject.toJavaObject(GetAnswerRequest.class));
@@ -196,7 +198,7 @@ public class Server {
         // 更新用户游戏状态
         userPlayStates.remove(userId);
         // 广播更新游戏状态
-        broadcastToAllClients(new PlayStatesUpdatedResponse(userPlayStates));
+        broadcastToAllClients(new PlayStatesUpdateResponse(userPlayStates));
     }
 
     /**
@@ -213,20 +215,17 @@ public class Server {
             return;
         }
 
-        // 生成正确单词
-        answer = WordUtils.getRandomWord(letterCount);
-
         // 广播给所有连接的客户端
         broadcastToAllClients(new StartGameResponse(letterCount));
+
+        // 生成正确单词
+        answer = WordUtils.getRandomWord(letterCount);
 
         // 初始化用户游戏状态
         for (UUID id : users.keySet()) {
             userPlayStates.put(id, new PlayState(0, 0));
             userKeyBoards.put(id, new LetterStatus[26]);
         }
-
-        // 广播更新游戏状态
-        broadcastToAllClients(new PlayStatesUpdatedResponse(userPlayStates));
 
         // 记录游戏开始时间
         startTime = System.currentTimeMillis();
@@ -247,11 +246,24 @@ public class Server {
     }
 
     /**
+     * 更新用户游戏状态列表（单播）
+     */
+    private void updatePlayStates(PlayStatesUpdateRequest request) {
+        UUID userId = request.getUserId();
+        log.info("用户 {} 请求更新游戏状态列表", userId);
+
+        // 发送响应给请求的客户端
+        PlayStatesUpdateResponse response = new PlayStatesUpdateResponse(userPlayStates);
+        response.setMessageId(request.getMessageId());
+        sendToClient(userId, response);
+    }
+
+    /**
      * 验证单词是否有效（单播）
      */
     private void validateWord(ValidateWordRequest request) {
         UUID userId = request.getUserId();
-        log.info("验证单词: {} (来自用户 {})", request.getWord(), userId);
+        log.info("用户 {} 验证单词: {}", userId, request.getWord());
 
         // 检查单词是否有效
         boolean isValid = WordUtils.isValidWord(request.getWord());
@@ -287,7 +299,7 @@ public class Server {
         userPlayStates.put(userId, playState);
 
         // 发送更新游戏状态给所有客户端
-        broadcastToAllClients(new PlayStatesUpdatedResponse(userPlayStates));
+        broadcastToAllClients(new PlayStatesUpdateResponse(userPlayStates));
 
         // 如果正确，记录游戏结束时间
         if (correct) {

@@ -36,8 +36,6 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
     private JScrollPane playStatesScrollPane;
     private JPanel playStatesPane;
 
-    private BackHomeDialog backHomeDialog;
-
     private User currentUser;
 
     public MultiPlayFrame() {
@@ -62,12 +60,11 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
         pack();
         ComponentUtils.setCenterWindowOnScreen(this);
 
-        backHomeDialog = createBackHomeDialog();
-
         playFrameHelper.setupListeners();
         // 返回主菜单按钮
         homeButton.addActionListener(e -> {
-
+            BackHomeDialog backHomeDialog = createBackHomeDialog();
+            backHomeDialog.setVisible(true);
         });
         // 认输按钮
         giveUpButton.addActionListener(e -> handleGiveUpButtonPressed());
@@ -92,6 +89,9 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
         this.currentUser = currentUser;
         // 更新面板
         playFrameHelper.updateGuessPane(letterCount);
+
+        // 主动请求更新一次游戏状态面板
+        multiPlayService.requestPlayStatesUpdate();
     }
 
     private void handleGiveUpButtonPressed() {
@@ -111,7 +111,7 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
     }
 
     private BackHomeDialog createBackHomeDialog() {
-        backHomeDialog = new BackHomeDialog(this);
+        BackHomeDialog backHomeDialog = new BackHomeDialog(this);
         backHomeDialog.addConfirmButtonListener(e -> {
             // 处理网络断开
             if (multiPlayService != null) {
@@ -137,23 +137,25 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
 
     @Subscribe
     public void onPlayListShow(PlayStateListShowEvent event) {
-        // 清空当前的游戏状态面板
-        playStatesPane.removeAll();
+        SwingUtilities.invokeLater(()->{
+            // 清空当前的游戏状态面板
+            playStatesPane.removeAll();
 
-        for (PlayStateVO playStateVO : event.playStateVOList()) {
-            // 创建一个玩家的游戏状态面板
-            PlayStatePanel playStatePanel = new PlayStatePanel(
-                    playStateVO.getAvatar(), playStateVO.getName(),
-                    playStateVO.getCorrectCount(), playStateVO.getWrongPositionCount());
+            for (PlayStateVO playStateVO : event.playStateVOList()) {
+                // 创建一个玩家的游戏状态面板
+                PlayStatePanel playStatePanel = new PlayStatePanel(
+                        playStateVO.getAvatar(), playStateVO.getName(),
+                        playStateVO.getCorrectCount(), playStateVO.getWrongPositionCount());
 
-            playStatesPane.add(playStatePanel);
-            playStatesPane.add(Box.createHorizontalStrut(10));
-        }
+                playStatesPane.add(playStatePanel);
+                playStatesPane.add(Box.createHorizontalStrut(10));
+            }
 
-        playStatesPane.revalidate();
-        playStatesPane.repaint();
-        playStatesScrollPane.revalidate();
-        playStatesScrollPane.repaint();
+            playStatesPane.revalidate();
+            playStatesPane.repaint();
+            playStatesScrollPane.revalidate();
+            playStatesScrollPane.repaint();
+        });
     }
 
     // 标记是否已经显示了游戏结束对话框
@@ -266,6 +268,7 @@ public class MultiPlayFrame extends BaseFrame implements GameOverDialogHandler {
         if (multiPlayService != null) {
             if (multiPlayService.isHost(currentUser.getId())) {
                 // 如果是房主，二次确认离开房间
+                BackHomeDialog backHomeDialog = createBackHomeDialog();
                 backHomeDialog.addConfirmButtonListener(e -> gameOverDialog.dispose());
                 backHomeDialog.setVisible(true);
             } else {

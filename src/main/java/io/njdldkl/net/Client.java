@@ -90,6 +90,14 @@ public class Client {
         tcpHelper.sendMessage(new StartGameRequest(userId, letterCount));
     }
 
+    /**
+     * 请求更新用户游戏状态列表（异步）
+     */
+    public void requestPlayStatesUpdate(UUID userId) throws IOException {
+        log.info("请求更新用户游戏状态列表: {}", userId);
+        tcpHelper.sendMessage(new PlayStatesUpdateRequest(userId));
+    }
+
     // 同步方式的请求下，等待结果的messageId与Future映射
     private final Map<UUID, CompletableFuture<?>> pendingFutures = new ConcurrentHashMap<>();
 
@@ -166,8 +174,8 @@ public class Client {
                 case "ValidateWordResponse" -> onValidateWord(jsonObject.toJavaObject(ValidateWordResponse.class));
                 case "CheckWordResponse" -> onCheckWord(jsonObject.toJavaObject(CheckWordResponse.class));
                 case "GetAnswerResponse" -> onGetAnswerResponse(jsonObject.toJavaObject(GetAnswerResponse.class));
-                case "PlayStatesUpdatedResponse" ->
-                        onPlayStatesUpdated(jsonObject.toJavaObject(PlayStatesUpdatedResponse.class));
+                case "PlayStatesUpdateResponse" ->
+                        onPlayStatesUpdated(jsonObject.toJavaObject(PlayStatesUpdateResponse.class));
                 case "GameOverResponse" -> onGameOver(jsonObject.toJavaObject(GameOverResponse.class));
                 default -> log.warn("未知消息类型: {}", type);
             }
@@ -238,7 +246,7 @@ public class Client {
         }
     }
 
-    private void onPlayStatesUpdated(PlayStatesUpdatedResponse response) {
+    private void onPlayStatesUpdated(PlayStatesUpdateResponse response) {
         log.info("用户游戏状态列表更新: {}", response);
         Map<UUID, PlayState> playStates = response.getPlayStates();
 

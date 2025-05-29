@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class PlayStatesUpdatedResponse extends BaseMessage {
+public class PlayStatesUpdateResponse extends BaseMessage {
 
     // 用户游戏状态列表
     private Map<UUID, PlayState> playStates;

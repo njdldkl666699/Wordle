@@ -208,6 +208,23 @@ public class MultiPlayService implements PlayService {
         }
     }
 
+    /**
+     * 请求获取当前的游戏状态列表
+     */
+    public void requestPlayStatesUpdate(){
+        if (client == null || !client.isConnected()) {
+            log.warn("客户端未连接或已关闭，无法请求游戏状态");
+            return;
+        }
+
+        try {
+            // 向服务器请求当前游戏状态
+            client.requestPlayStatesUpdate(currentUser.getId());
+        } catch (IOException e) {
+            log.error("请求游戏状态列表失败: ", e);
+        }
+    }
+
     @Subscribe
     public void onPlayStateListUpdated(PlayStateListUpdatedEvent event) {
         List<PlayStateVO> playStateVOList = new ArrayList<>();
