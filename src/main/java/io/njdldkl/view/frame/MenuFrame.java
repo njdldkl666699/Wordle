@@ -97,22 +97,30 @@ public class MenuFrame extends BaseFrame {
 
     /**
      * 顺序按下title1, title2, title3, title4, title5, title6时触发彩蛋
+     * 如果点击不按顺序或重复点击已按下的按钮，将重置进度
      */
-    private void handleTitleButtonPress(int i) {
-        // 检查是否按顺序
-        for (int j = 0; j < i; j++) {
-            if (!titleButtonsPressed[j]) {
-                // 按错顺序，全部重置
-                Arrays.fill(titleButtonsPressed, false);
-                return;
+    private void handleTitleButtonPress(int buttonIndex) {
+        // 检查是否是下一个要按的按钮
+        int nextButtonToPress = 0;
+        for (int i = 0; i < titleButtonsPressed.length; i++) {
+            if (!titleButtonsPressed[i]) {
+                nextButtonToPress = i;
+                break;
             }
         }
-        // 当前按钮未按下且前面都已按下
-        if (!titleButtonsPressed[i]) {
-            titleButtonsPressed[i] = true;
+
+        // 如果点击的不是下一个要按的按钮，重置所有状态
+        if (buttonIndex != nextButtonToPress) {
+            log.debug("彩蛋进度重置：点击了错误的按钮");
+            Arrays.fill(titleButtonsPressed, false);
+            return;
         }
 
-        // 如果全部按下，触发彩蛋并重置
+        // 标记当前按钮为已按下
+        titleButtonsPressed[buttonIndex] = true;
+        log.debug("彩蛋进度：按下按钮 {}", buttonIndex + 1);
+
+        // 检查是否所有按钮都已按下
         boolean allPressed = true;
         for (boolean pressed : titleButtonsPressed) {
             if (!pressed) {
@@ -120,8 +128,10 @@ public class MenuFrame extends BaseFrame {
                 break;
             }
         }
+
+        // 如果全部按下，触发彩蛋并重置
         if (allPressed) {
-            log.debug("触发彩蛋");
+            log.info("触发彩蛋");
             WindowManager.getInstance().showEasterEggDialog();
             Arrays.fill(titleButtonsPressed, false);
         }
