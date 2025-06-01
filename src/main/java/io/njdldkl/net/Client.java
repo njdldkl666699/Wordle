@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 public class Client {
 
-    private Socket serverSocket;
+    private Socket clientSocket;
     private boolean isConnected = false;
 
     private TcpJsonHelper tcpHelper;
@@ -47,12 +47,12 @@ public class Client {
     public void connect(User user, String roomId) throws IOException {
         // 通过房间ID解析服务器地址，端口已知
         String host = IpRoomIdUtils.roomIdToIp(roomId);
-        serverSocket = new Socket(host, IntegerConstant.PORT);
+        clientSocket = new Socket(host, IntegerConstant.PORT);
         log.info("连接到服务器：{}:{}", host, IntegerConstant.PORT);
 
         try {
             messageHandler = new ClientMessageHandler();
-            tcpHelper = new TcpJsonHelper(serverSocket, messageHandler);
+            tcpHelper = new TcpJsonHelper(clientSocket, messageHandler);
             tcpHelper.startReceiver();
             isConnected = true;
 
@@ -69,7 +69,7 @@ public class Client {
      * 检查连接状态
      */
     public boolean isConnected() {
-        return isConnected && serverSocket != null && !serverSocket.isClosed();
+        return isConnected && clientSocket != null && !clientSocket.isClosed();
     }
 
     /**
@@ -148,9 +148,9 @@ public class Client {
             tcpHelper.close();
         }
 
-        if (serverSocket != null && !serverSocket.isClosed()) {
+        if (clientSocket != null && !clientSocket.isClosed()) {
             try {
-                serverSocket.close();
+                clientSocket.close();
                 log.info("客户端连接已关闭");
             } catch (IOException e) {
                 log.error("关闭连接时出错: {}", e.getMessage(), e);
