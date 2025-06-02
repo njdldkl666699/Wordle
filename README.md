@@ -1,7 +1,7 @@
 # Wordle 游戏 🎮
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
+[![License](https://img.shields.io/badge/License-LGPLv2-blue.svg)](LICENSE.md)
 [![GitHub stars](https://img.shields.io/github/stars/njdldkl666699/Wordle?style=social)](https://github.com/njdldkl666699/Wordle/stargazers)
 
 基于 Java Swing 开发的经典 Wordle 单词猜谜游戏，支持单人和多人对战模式。
